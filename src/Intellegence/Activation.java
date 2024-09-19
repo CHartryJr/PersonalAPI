@@ -13,13 +13,27 @@ public enum Activation
         @Override
         double derive(double value) 
         {
-            return (1+Math.exp(-value)) * Math.exp(-value)
+            return (1+Math.exp(-value)) * Math.exp(-value);
         }
     },
 
+    HTan
+    {
+        @Override
+        double apply(double value) 
+        {
+            return (1-Math.exp(-value))/(1+Math.exp(-value));
+        }
+
+        @Override
+        double derive(double value) 
+        {
+            return (2*(Math.exp(value)))/ Math.pow(Math.exp(value)+1,2);
+        }
+    },
+    
     ReLu
     {
-
         @Override
         double apply(double value) 
         {
@@ -31,12 +45,10 @@ public enum Activation
         {
           return value > 0 ? 1.0d : 0.0d;
         }
-
     },
 
     Step
     {
-
         @Override
         double apply(double value) 
         {
@@ -47,9 +59,7 @@ public enum Activation
         double derive(double value) 
         {
             return 0;
-            //throw new ArithmeticException("Step Function's derivative is 0 for all {x|x ε 𝐑}");
         }
-
     };
 
     /**
