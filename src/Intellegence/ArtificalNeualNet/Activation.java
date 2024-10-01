@@ -1,4 +1,4 @@
-package Intellegence;
+package Intellegence.ArtificalNeualNet;
 
 public enum Activation 
 {

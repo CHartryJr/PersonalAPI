@@ -1,12 +1,12 @@
 package Intellegence;
-
-import Intellegence.ArtificalNeualNet.NeualNet;
-
+/**
+ * class uses to implement models.
+ */
 public class Agent 
 {
-    private Encephalon<?> intelect = new NeualNet();
-    public  Agent()
+    private Encephalon<?> intelect;
+    public  Agent(Encephalon<?> intelect)
     {
-    
+        this.intelect = intelect;
     }
 }

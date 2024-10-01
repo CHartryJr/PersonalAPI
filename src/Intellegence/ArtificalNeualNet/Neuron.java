@@ -3,7 +3,7 @@ import java.util.Random;
 /**
  * Neuron class to 
  */
-class Neuron 
+class Neuron
 {
     private double weightsIn[];
     private double weightsOut[];
@@ -13,6 +13,7 @@ class Neuron
     {
         weightsIn =null;
         weightsOut = null;
+        bias = 0.0d;
     }
     /**
      * @apiNote Used to create batch of new In/out weights based off of the number of neurons in the prevous and outer later.
@@ -22,6 +23,7 @@ class Neuron
     protected  void init(int layerIn, int layerOut)
     {
         Random rand = new Random(System.currentTimeMillis());
+        bias = rand.nextDouble();
         this.weightsIn =  new double [layerIn];
         this.weightsOut = new double [layerOut];
         int count = 0;
@@ -37,6 +39,7 @@ class Neuron
             ++count;
         }
     }
+
     /**
      * @return the weightsIn
      */
@@ -64,5 +67,21 @@ class Neuron
     protected void setWeightsOut(double[] weightsOut)
     {
         this.weightsOut = weightsOut;
+    }
+
+    /**
+     * @return the bias
+     */
+    protected double getBias()
+    {
+        return bias;
+    }
+
+    /**
+     * @param bias the bias to set
+     */
+    public void setBias(double bias) 
+    {
+        this.bias = bias;
     }    
 }
