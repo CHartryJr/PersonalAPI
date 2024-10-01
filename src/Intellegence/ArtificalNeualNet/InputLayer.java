@@ -2,11 +2,6 @@ package Intellegence.ArtificalNeualNet;
 public class InputLayer extends Layer
 {
     private double [] inputRep; 
-    protected InputLayer()
-    {
-        super();
-        inputRep = new double[]{0,0,0,0,0};
-    }
     /**
      * The inoput is a double repesntaion of the inputs 
      * @param inputRep
@@ -16,6 +11,10 @@ public class InputLayer extends Layer
     {
         super();
         this.inputRep = inputRep;
+        while(inputRep.length > neurons.size())
+        {
+            neurons.add(new Neuron());
+        }
     }
 
     /**

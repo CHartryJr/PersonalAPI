@@ -2,7 +2,7 @@ package Intellegence.ArtificalNeualNet;
 
 public enum Activation 
 {
-    Sigmod
+    SIGMOID
     {
         @Override
         double apply(double value) 
@@ -17,7 +17,7 @@ public enum Activation
         }
     },
 
-    HTan
+    HYPER_TANGENT
     {
         @Override
         double apply(double value) 
@@ -31,8 +31,30 @@ public enum Activation
             return (2*(Math.exp(value)))/ Math.pow(Math.exp(value)+1,2);
         }
     },
+
+    HAILSTONE
+    {
+
+        @Override
+        double apply(double value) 
+        {
+            value = Math.floor(value);
+            if(value == 1) 
+                return 1.0;
+            return value % 2 == 0 ?  value/2 : 3*value+1;
+        }
+
+        @Override
+        double derive(double value) 
+        {
+            value = Math.floor(value);
+            if(value == 1 )
+                return 0;
+            return value % 2 == 0 ? .5 : 3;
+        }
+    },
     
-    ReLu
+    RECTIFIED_LINEAR_UNIT
     {
         @Override
         double apply(double value) 
@@ -47,7 +69,7 @@ public enum Activation
         }
     },
 
-    Step
+    STEP
     {
         @Override
         double apply(double value) 

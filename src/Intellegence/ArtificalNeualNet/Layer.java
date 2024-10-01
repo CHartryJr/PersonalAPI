@@ -7,7 +7,7 @@ import java.util.ArrayList;
 abstract class Layer
 {
     protected ArrayList<Neuron> neurons = new ArrayList<Neuron>();
-    protected Activation func = Activation.ReLu;
+    protected Activation func = Activation.HAILSTONE;
     protected Layer prev = null;
     protected Layer next = null;
     abstract void init();
