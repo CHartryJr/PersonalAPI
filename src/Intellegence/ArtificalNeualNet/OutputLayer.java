@@ -4,11 +4,8 @@ public class OutputLayer extends Layer
 {
      public OutputLayer( int numberOfOutputs)
     {
-        super();
-        while(numberOfOutputs > neurons.size())
-        {
-            neurons.add(new Neuron());
-        }
+        super(numberOfOutputs);
+       
     }
 
     @Override

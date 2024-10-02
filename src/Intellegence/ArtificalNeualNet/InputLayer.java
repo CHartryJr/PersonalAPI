@@ -1,20 +1,17 @@
 package Intellegence.ArtificalNeualNet;
 public class InputLayer extends Layer
 {
-    private double [] inputRep; 
+    int numberOfInputNeurons;
+  
     /**
      * The inoput is a double repesntaion of the inputs 
      * @param inputRep
      */
-
-    public InputLayer(double [] inputRep)
+      
+    public InputLayer(int numberOfInputNeurons)
     {
-        super();
-        this.inputRep = inputRep;
-        while(inputRep.length > neurons.size())
-        {
-            neurons.add(new Neuron());
-        }
+        super(numberOfInputNeurons);
+        this.numberOfInputNeurons = numberOfInputNeurons;
     }
 
     /**
@@ -28,8 +25,7 @@ public class InputLayer extends Layer
     @Override
     void init() 
     {
-        this.neurons.forEach(neuron -> neuron.init(inputRep.length, next.neurons.size()));
-        this.neurons.forEach(neuron -> neuron.setWeightsIn(inputRep));
+        this.neurons.forEach(neuron -> neuron.init(numberOfInputNeurons, next.neurons.size()));
     }
 
 }
