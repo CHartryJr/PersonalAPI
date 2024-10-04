@@ -2,7 +2,7 @@ bin/
 bin
 lib/ 
 lib
-vscode/
-vscode
+.vscode/
+.vscode
 tests
 test/
