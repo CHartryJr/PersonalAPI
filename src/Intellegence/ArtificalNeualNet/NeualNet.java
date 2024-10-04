@@ -6,13 +6,24 @@ import java.util.Random;
  */
 public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
 {
-    private final int GENERATOR = 20;
+    private final int GENERATOR;
     private int numberOfInputs,numberOfLayers,numberOfOutPuts,size;
     private double fitness;
     private InputLayer firstLayer  = null;
    
-    public NeualNet(int numberOfInputs,int numberOfLayers,int numberOfOutPuts)
+    public NeualNet(int numberOfInputs, int numberOfLayers, int numberOfOutPuts)
     {
+        GENERATOR = 20;
+        size = 0;
+        fitness = -1.0d;
+        this.numberOfLayers = numberOfLayers;
+        this.numberOfOutPuts = numberOfOutPuts;
+        this.numberOfInputs = numberOfInputs;
+    }
+
+    public NeualNet(int numberOfInputs,int numberOfLayers,int numberOfOutPuts,int maxNumOfNueouns)
+    {
+        GENERATOR = maxNumOfNueouns;
         size = 0;
         fitness = -1.0d;
         this.numberOfLayers = numberOfLayers;

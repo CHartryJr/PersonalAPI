@@ -1,6 +1,8 @@
 bin/
 bin
-lib 
-lib/
-vscode
+lib/ 
+lib
 vscode/
+vscode
+tests
+test/

@@ -15,21 +15,25 @@ abstract class Layer
             neurons.add(new Neuron());
         }
     }
+
     
     public void  setActivation(Activation func)
     {
         this.func  = func;
     }
 
-    public void printLayer()
+    public void printLayerInfo()
     {
-        System.out.println(this);
+      String message = String.format(this+"\n Prevous Layer Size: %d and Next Layer Size: %d ",
+      prev ==null ? 0 : prev.neurons.size()
+      ,next == null ? 0 : next.neurons.size());
+      System.out.println(message);
     }
     
     @Override
     public String toString() 
     {
-        String message =String.format("Current Activation: %s, Number of Neurons{%d}\n_________________________________________________",this.func,this.neurons.size());
+        String message = String.format("\nCurrent Activation: %s, Number of Neurons: %d\n_________________________________________________",this.func,this.neurons.size());
         return message;
     }
 
