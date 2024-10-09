@@ -33,12 +33,40 @@ abstract class Layer
     @Override
     public String toString() 
     {
-        String message = String.format("\nCurrent Activation: %s, Number of Neurons: %d\n_________________________________________________",this.func,this.neurons.size());
+        String test = String.valueOf(this.getClass());
+        String [] tokken = test.split("\\.");
+        String currentClass = tokken[tokken.length -1];
+        String message = String.format("\nLayer: %s, Current Activation: %s, Number of Neurons: %d\n_________________________________________________",currentClass,this.func,this.neurons.size());
         return message;
     }
 
+    /**
+     * @apiNote uses tyhe 
+     * @param index
+     * @return  summation of neuron's output weight(index)
+     * @implNote Z = Summation (Wi + Xi) + b, Z is what we are returning
+     */
+    protected double summation(int index)
+    {
+        double sum = 0;
+        int i = 0;
+        int outSize = neurons.get(0).getWeightsIn().length;
+        while(i < neurons.size())
+        {
+            int j = 0;
+            while(j < outSize)
+            {
+                sum += neurons.get(i).getWeightsIn()[j] * neurons.get(i).getWeightsOut()[j] + neurons.get(i).getBias();
+                ++j;
+            } 
+            ++i;
+        }
+
+        return sum;
+    }
+
     protected ArrayList<Neuron> neurons = new ArrayList<Neuron>();
-    protected Activation func = Activation.HAILSTONE;
+    protected Activation func = Activation.STEP;
     protected Layer prev = null;
     protected Layer next = null;
     abstract void init();

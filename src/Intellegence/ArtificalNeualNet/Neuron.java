@@ -15,6 +15,7 @@ class Neuron
         weightsOut = null;
         bias = 0.0d;
     }
+   
     /**
      * @apiNote Used to create batch of new In/out weights based off of the number of neurons in the prevous and outer later.
      * @param layerIn
@@ -35,7 +36,7 @@ class Neuron
         count = 0;
         while(count < layerOut)
         {
-            weightsIn[count] = rand.nextDouble();
+            weightsOut[count] = rand.nextDouble();
             ++count;
         }
     }
