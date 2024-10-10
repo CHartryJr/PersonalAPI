@@ -15,7 +15,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
 
     public NeualNet(int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts)
     {
-        MAX_NUMBER_NEURONS = 10;
+        MAX_NUMBER_NEURONS = 5;
         size = 0;
         fitness = -1.0d;
         this.numberOfHiddenLayers = numberOfHiddenLayers;
@@ -47,12 +47,6 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         return size;
     }
 
-    public String ShowCurrentInput()
-    {
-        
-       return firstLayer.getInputRep();
-    }
-
     @Override
     public void observe(double[]parsept) 
     {
@@ -72,17 +66,33 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     public void forward()
     {
         Layer currentlayer = firstLayer;
-        while(currentlayer != null)
+        double [] output;
+        while(currentlayer != null & currentlayer.next != null)
         {
-            
-            
+            output = currentlayer.Activate();
+            currentlayer.next.setInputRep(output);
+            currentlayer = currentlayer.next;
         }
     }
 
     public double[] predict()
     {
-        return lastLayer.neurons.get(0).getWeightsOut();
+        return lastLayer.Activate();
     } 
+
+
+    @Override
+    public String toString()
+    {
+        Layer currentLayer = firstLayer;
+        String message = "";
+        while(currentLayer != null)
+        {
+            message += currentLayer.toString();
+            currentLayer = currentLayer.next;
+        }
+        return message;
+    }
 
     @Override
     public int compareTo(NeualNet o) 
@@ -103,14 +113,15 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         return flag;
     }
 
+
     private void init()
     {
         Random rand = new Random(System.currentTimeMillis());
         firstLayer = new InputLayer(numberOfInputs);
-        firstLayer.next = new HiddenLayer(rand.nextInt(MAX_NUMBER_NEURONS) + 1);
-        Layer currentLayer = firstLayer.next;
+        Layer currentLayer = new HiddenLayer(rand.nextInt(MAX_NUMBER_NEURONS) + 1);
+        firstLayer.next = currentLayer;
+        currentLayer.prev = firstLayer;
         firstLayer.init();
-        currentLayer.prev  = firstLayer;
         size = 3;
         int i = 1;
         while(i < numberOfHiddenLayers)
@@ -124,7 +135,9 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         }
         lastLayer = new OutputLayer(numberOfOutPuts);
         currentLayer.next = lastLayer;
+        currentLayer.init();
         lastLayer.prev = currentLayer; 
+        lastLayer.init();
     }
 
     private double[] flatten(double[][] parsept) 

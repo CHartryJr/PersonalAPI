@@ -6,6 +6,14 @@ import java.util.ArrayList;
  */
 abstract class Layer
 {
+    protected Layer prev = null;
+    protected Layer next = null;
+    protected ArrayList<Neuron> neurons = new ArrayList<Neuron>();
+    protected double [] currerntInput;
+    private Activation activation = Activation.STEP;
+
+    abstract void init();
+
     public Layer(int numberOfNeurons)
     {
     if(numberOfNeurons < 1)
@@ -14,13 +22,15 @@ abstract class Layer
         {
             neurons.add(new Neuron());
         }
+        currerntInput = new double[neurons.get(0).getWeightsIn().length];
     }
 
-    
     public void  setActivation(Activation func)
     {
-        this.func  = func;
+        this.activation  = func;
     }
+
+   
 
     public void printLayerInfo()
     {
@@ -29,46 +39,68 @@ abstract class Layer
       ,next == null ? 0 : next.neurons.size());
       System.out.println(message);
     }
-    
-    @Override
-    public String toString() 
+
+    /**
+     * @return the activation
+     */
+    public Activation getActivation() 
     {
-        String test = String.valueOf(this.getClass());
-        String [] tokken = test.split("\\.");
-        String currentClass = tokken[tokken.length -1];
-        String message = String.format("\nLayer: %s, Current Activation: %s, Number of Neurons: %d\n_________________________________________________",currentClass,this.func,this.neurons.size());
-        return message;
+        return activation;
     }
 
     /**
-     * @apiNote uses tyhe 
-     * @param index
-     * @return  summation of neuron's output weight(index)
-     * @implNote Z = Summation (Wi + Xi) + b, Z is what we are returning
+     * @apiNote set the activation function
      */
-    protected double summation(int index)
+    public void SetActivation(Activation func) 
     {
-        double sum = 0;
-        int i = 0;
-        int outSize = neurons.get(0).getWeightsIn().length;
-        while(i < neurons.size())
-        {
-            int j = 0;
-            while(j < outSize)
-            {
-                sum += neurons.get(i).getWeightsIn()[j] * neurons.get(i).getWeightsOut()[j] + neurons.get(i).getBias();
-                ++j;
-            } 
-            ++i;
-        }
-
-        return sum;
+        this.activation = func;
     }
 
-    protected ArrayList<Neuron> neurons = new ArrayList<Neuron>();
-    protected Activation func = Activation.STEP;
-    protected Layer prev = null;
-    protected Layer next = null;
-    abstract void init();
-   
+    @Override
+    public String toString() 
+    {
+        StringBuilder message = new StringBuilder();
+        message.append(String.format("\n{**** %s ****}\nCurrent Activation: %s\nNumber of Neurons: %d\n\n", 
+                                    this.getClass().getSimpleName().toUpperCase(), activation,neurons.size()));
+
+        for (int i = 0; i < neurons.size(); ++i) 
+        {
+            Neuron temp = neurons.get(i);
+            message.append(String.format("NEURON %d\n\nINPUT WEIGHTS: [ ", i + 1));
+
+            for (double w : temp.getWeightsIn()) 
+            {
+                message.append(w).append("  ");
+            }
+
+            message.append("]\nOUTPUT WEIGHTS: [ ");
+
+            for (double w : temp.getWeightsOut()) 
+            {
+                message.append(w).append("  ");
+            }
+
+            message.append("]\n\n");
+        }
+        return message.toString();
+    }
+    /**
+    * @param inputRep the inputRep to set
+    */
+   protected void setInputRep(double[] inputRep) 
+   {
+       currerntInput = inputRep;
+   }
+// func(z) * outW = next layer neurons input
+    protected double [] Activate()
+    {
+        int outSize = next.neurons.get(0).getWeightsIn().length;
+        double [] actValues = new double [outSize];
+        
+        for(int i = 0; i < outSize; ++i) //i = current neuron on both sides
+        {
+           actValues[i] = activation.apply(neurons.get(i).summation(currerntInput)) * neurons.get(i).getWeightsOut()[i];
+        }
+        return actValues;
+    }
 }

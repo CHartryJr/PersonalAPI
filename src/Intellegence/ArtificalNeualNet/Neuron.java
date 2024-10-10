@@ -11,8 +11,8 @@ class Neuron
 
     protected Neuron()
     {
-        weightsIn =null;
-        weightsOut = null;
+        weightsIn = new double[0];
+        weightsOut = new double[0];
         bias = 0.0d;
     }
    
@@ -23,21 +23,19 @@ class Neuron
      */
     protected  void init(int layerIn, int layerOut)
     {
-        Random rand = new Random(System.currentTimeMillis());
+        Random rand = new Random();
         bias = rand.nextDouble();
         this.weightsIn =  new double [layerIn];
         this.weightsOut = new double [layerOut];
-        int count = 0;
-        while(count < layerIn )
+
+        for (int i = 0; i < layerIn; ++i) 
         {
-            weightsIn[count] = rand.nextDouble();
-            ++count;
+            weightsIn[i] = rand.nextDouble();
         }
-        count = 0;
-        while(count < layerOut)
+        
+        for (int i = 0; i < layerOut; ++i) 
         {
-            weightsOut[count] = rand.nextDouble();
-            ++count;
+            weightsOut[i] = rand.nextDouble();
         }
     }
 
@@ -85,4 +83,29 @@ class Neuron
     {
         this.bias = bias;
     }    
+
+     /**
+     * @apiNote uses tyhe 
+     * @param index
+     * @return  summation of neuron's output weight(index)
+     * @implNote Z = Summation (Wi + Xi) + b, Z is what we are returning
+     */
+    public double summation(double[] inputs) 
+    {
+        if (inputs.length != weightsIn.length)  
+        {
+            throw new IllegalArgumentException("Input length must match the number of input weights.");
+        }
+
+        double sum = 0.0;
+
+        // Dot product of inputs and weights
+        for (int i = 0; i < inputs.length; i++) 
+        {
+            sum += inputs[i] * weightsIn[i];
+        }
+        // Add bias to the summation
+        sum += bias;
+        return sum;
+    }
 }
