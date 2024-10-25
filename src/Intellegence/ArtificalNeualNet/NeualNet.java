@@ -1,6 +1,7 @@
 package Intellegence.ArtificalNeualNet;
 import Intellegence.Encephalon;
 import java.util.Random;
+
 /**
  *  This a low scale mock of a neual network that show my understanding of simple ANN.
  * @author Carl Hartry Jr.
@@ -12,6 +13,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     private double fitness;
     private final int MAX_NUMBER_NEURONS;
     private int numberOfInputs,numberOfHiddenLayers,numberOfOutPuts,size;
+    private boolean observed;
 
     public NeualNet(int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts)
     {
@@ -22,6 +24,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
         firstLayer  = null;
+        observed =false;
         init();
     }
 
@@ -36,6 +39,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
         firstLayer  = null;
+        observed = false;
         init();
     }
 
@@ -52,6 +56,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     {
         if (parsept.length != numberOfInputs)
             throw new IndexOutOfBoundsException("Parsept does Not match number of inputs");
+        observed = true;
         firstLayer.setInputRep(parsept);
     }
 
@@ -59,12 +64,15 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     {
         if (parsept.length * parsept[0].length != numberOfInputs)
             throw new IndexOutOfBoundsException("Parsept does Not match number of inputs");
+        observed = true;
         double [] convertedParsept = flatten(parsept);
         firstLayer.setInputRep(convertedParsept);
     }
 
     public void forward()
     {
+        if(observed)
+        throw new IllegalStateException("Must observe Inputs before Prediction");
         Layer currentlayer = firstLayer;
         double [] output;
         while(currentlayer != null & currentlayer.next != null)
@@ -75,9 +83,15 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         }
     }
 
+    /**
+     * @implNote Must call Observe before using this method call.
+     * @return
+     */
     public double[] predict()
-    {
-        return lastLayer.Activate();
+    {   
+        if(observed)
+        throw new IllegalStateException("Must observe Inputs before Prediction");
+        return lastLayer.predict();
     } 
 
 

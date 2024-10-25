@@ -10,7 +10,7 @@ abstract class Layer
     protected Layer next = null;
     protected ArrayList<Neuron> neurons = new ArrayList<Neuron>();
     protected double [] currerntInput;
-    private Activation activation = Activation.STEP;
+    protected Activation activation = Activation.RECTIFIED_LINEAR_UNIT;
 
     abstract void init();
 
@@ -94,12 +94,15 @@ abstract class Layer
 // func(z) * outW = next layer neurons input
     protected double [] Activate()
     {
+        if(next == null)
+            throw new IndexOutOfBoundsException("Activation failure at "+  this.getClass().getSimpleName().toUpperCase());
+
         int outSize = next.neurons.get(0).getWeightsIn().length;
         double [] actValues = new double [outSize];
         
         for(int i = 0; i < outSize; ++i) //i = current neuron on both sides
         {
-           actValues[i] = activation.apply(neurons.get(i).summation(currerntInput)) * neurons.get(i).getWeightsOut()[i];
+           actValues[i] = activation.apply(neurons.get(i).summation(currerntInput)); // * neurons.get(i).getWeightsOut()[i];// multipling by out weight shows neurons confidence 
         }
         return actValues;
     }
