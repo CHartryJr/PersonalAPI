@@ -2,10 +2,12 @@ package Intellegence.ArtificalNeualNet;
 
 public class OutputLayer extends Layer
 {
+    private double [] currentOutput;
+
      public OutputLayer( int numberOfOutputs)
     {
         super(numberOfOutputs);
-       
+        currentOutput = new double[numberOfOutputs];
     }
 
     @Override
@@ -15,15 +17,34 @@ public class OutputLayer extends Layer
     }
     
 
-    protected double[] predict()
+    protected double[] getCurrentOutput()
     {
-        double [] actValues = new double [neurons.size()];
-        
-        for(int i = 0; i < neurons.size(); ++i) //i = current neuron on both sides
+        return currentOutput;
+    }
+
+    @Override
+    void Activate() 
+    {
+        if( prev == null)
+            throw new UnsupportedOperationException("There are no linked layers to tghe output layer look over network");
+
+        for(int i = 0; i <  prev.neurons.size(); ++i)
         {
-           actValues[i] = activation.apply(neurons.get(i).summation(currerntInput));
+            Neuron currentNeuron = prev.neurons.get(i);
+            for(Neuron x : neurons)
+            {
+                double input =  prev.activation.apply(currentNeuron.getOutput() + currentNeuron.getBias());
+                x.setOutput( x.getOutput() + (x.getWeightsIn()[i] * input));
+            }
+            prev.neurons.get(i).setOutput(0.0d);
         }
-        return actValues;
+
+        for(int i = 0; i < neurons.size(); ++i)
+        {
+            currentOutput[i] = neurons.get(i).getOutput();
+            neurons.get(i).setOutput(0.0d);
+        }
+
     }
 
 }

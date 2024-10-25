@@ -8,12 +8,15 @@ class Neuron
     private double weightsIn[];
     private double weightsOut[];
     private double bias;
+    private double output;
+    private Random rand;
 
     protected Neuron()
     {
-        weightsIn = new double[0];
-        weightsOut = new double[0];
+        weightsIn = new double[]{0};
+        weightsOut = new double[]{0};
         bias = 0.0d;
+        output = 0.0d;
     }
    
     /**
@@ -23,20 +26,20 @@ class Neuron
      */
     protected  void init(int layerIn, int layerOut)
     {
-        Random rand = new Random();
+        rand = new Random();
         bias = rand.nextDouble();
-        this.weightsIn =  new double [layerIn];
-        this.weightsOut = new double [layerOut];
+        weightsIn = randomizedWeightsList(layerIn);
+        weightsOut = randomizedWeightsList(layerOut);
+    }
 
-        for (int i = 0; i < layerIn; ++i) 
+    protected double [] randomizedWeightsList(int size)
+    {
+        double [] weights = new double[size];
+        for (int i = 0; i < size; ++i) 
         {
-            weightsIn[i] = rand.nextDouble();
+            weights[i] = rand.nextDouble();
         }
-        
-        for (int i = 0; i < layerOut; ++i) 
-        {
-            weightsOut[i] = rand.nextDouble();
-        }
+        return weights;
     }
 
     /**
@@ -107,5 +110,21 @@ class Neuron
         // Add bias to the summation
         sum += bias;
         return sum;
+    }
+
+    /**
+     * @return the output
+     */
+    protected double getOutput() 
+    {
+        return output;
+    }
+
+    /**
+     * @param output the output to set
+     */
+    protected void setOutput(double output) 
+    {
+        this.output = output;
     }
 }

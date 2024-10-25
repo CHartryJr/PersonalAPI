@@ -13,7 +13,6 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     private double fitness;
     private final int MAX_NUMBER_NEURONS;
     private int numberOfInputs,numberOfHiddenLayers,numberOfOutPuts,size;
-    private boolean observed;
 
     public NeualNet(int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts)
     {
@@ -24,7 +23,6 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
         firstLayer  = null;
-        observed =false;
         init();
     }
 
@@ -39,7 +37,6 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
         firstLayer  = null;
-        observed = false;
         init();
     }
 
@@ -54,32 +51,22 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     @Override
     public void observe(double[]parsept) 
     {
-        if (parsept.length != numberOfInputs)
-            throw new IndexOutOfBoundsException("Parsept does Not match number of inputs");
-        observed = true;
         firstLayer.setInputRep(parsept);
     }
 
     public void observe(double[][]parsept) 
     {
-        if (parsept.length * parsept[0].length != numberOfInputs)
-            throw new IndexOutOfBoundsException("Parsept does Not match number of inputs");
-        observed = true;
         double [] convertedParsept = flatten(parsept);
         firstLayer.setInputRep(convertedParsept);
     }
 
     public void forward()
     {
-        if(observed)
-        throw new IllegalStateException("Must observe Inputs before Prediction");
-        Layer currentlayer = firstLayer;
-        double [] output;
-        while(currentlayer != null & currentlayer.next != null)
+        Layer currentLayer  = firstLayer;
+        while(currentLayer != null)
         {
-            output = currentlayer.Activate();
-            currentlayer.next.setInputRep(output);
-            currentlayer = currentlayer.next;
+            currentLayer.Activate();
+            currentLayer = currentLayer.next;
         }
     }
 
@@ -89,9 +76,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
      */
     public double[] predict()
     {   
-        if(observed)
-        throw new IllegalStateException("Must observe Inputs before Prediction");
-        return lastLayer.predict();
+        return lastLayer.getCurrentOutput();
     } 
 
 
