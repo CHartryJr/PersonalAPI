@@ -27,7 +27,7 @@ class Neuron
     protected  void init(int layerIn, int layerOut)
     {
         rand = new Random();
-        bias = rand.nextDouble();
+        bias =  Math.pow(-1,(rand.nextInt(2)+1))*rand.nextDouble();
         weightsIn = randomizedWeightsList(layerIn);
         weightsOut = randomizedWeightsList(layerOut);
     }
@@ -37,7 +37,7 @@ class Neuron
         double [] weights = new double[size];
         for (int i = 0; i < size; ++i) 
         {
-            weights[i] = rand.nextDouble();
+            weights[i] = Math.pow(-1,(rand.nextInt(2)+1))*rand.nextDouble();
         }
         return weights;
     }
