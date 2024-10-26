@@ -5,13 +5,12 @@ public class HiddenLayer extends Layer
     public HiddenLayer(int numberOfNeurons)
     {
         super(numberOfNeurons);
-       
     }
 
     @Override
     void init() 
     {
-        this.neurons.forEach(neuron -> neuron.init(prev.neurons.size(), next.neurons.size())); 
+        this.neurons.forEach(neuron -> neuron.init(prev.neurons.size())); 
     }
 
     @Override
@@ -20,15 +19,15 @@ public class HiddenLayer extends Layer
         if( prev == null || next == null)
             throw new UnsupportedOperationException("There are no linked layers look over network");
 
-        for(int i = 0; i <  prev.neurons.size(); ++i)
-        {
-            Neuron  currentNeuron = prev.neurons.get(i);
-            for(Neuron x : neurons)
+        for(Neuron x : neurons)
+        {   
+            double net = 0.0d; 
+            for(int i = 0; i <  prev.neurons.size(); ++i)
             {
-                double input =  prev.activation.apply(currentNeuron.getOutput() + currentNeuron.getBias());
-                x.setOutput( x.getOutput() + (x.getWeightsIn()[i] * input));
+                double input = prev.neurons.get(i).getOutput() ;
+                net += (x.getWeightsIn()[i] * input);
             }
-            prev.neurons.get(i).setOutput(0.0d);
+            x.setOutput(activation.apply(net + x.getBias()));
         }
     }
 }

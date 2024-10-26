@@ -62,21 +62,19 @@ abstract class Layer
         for (int i = 0; i < neurons.size(); ++i) 
         {
             Neuron temp = neurons.get(i);
-            message.append(String.format("NEURON %d\n\nINPUT WEIGHTS: [ ", i + 1));
+            message.append(String.format("> NEURON %d <\n\n WEIGHTS: [ ", i + 1));
 
             for (double w : temp.getWeightsIn()) 
             {
                 message.append(w).append("  ");
             }
 
-            message.append("]\nOUTPUT WEIGHTS: [ ");
-
-            for (double w : temp.getWeightsOut()) 
-            {
-                message.append(w).append("  ");
-            }
-
-            message.append("]\n\n");
+            message.append("]\n\n Bias :[ ");
+            message.append(neurons.get(i).getBias()).append(" ]");
+        
+            message.append("\n\n Output  : [ ");
+            message.append(neurons.get(i).getOutput()).append(" ]");
+            message.append("\n\n");
         }
         return message.toString();
     }

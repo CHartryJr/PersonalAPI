@@ -13,6 +13,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     private double fitness;
     private final int MAX_NUMBER_NEURONS;
     private int numberOfInputs,numberOfHiddenLayers,numberOfOutPuts,size;
+    private double learningRate = .001d;
 
     public NeualNet(int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts)
     {
@@ -66,6 +67,30 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         while(currentLayer != null)
         {
             currentLayer.Activate();
+            currentLayer = currentLayer.next;
+        }
+    }
+
+    public void  setActivation(Activation e)
+    {
+        Layer currentLayer = firstLayer;
+        while (currentLayer != null)
+        {
+            currentLayer.setActivation(e);
+            currentLayer = currentLayer.next;
+        }
+    }
+
+    public void  setActivation(Activation e, int index)
+    {
+        if( index < 0  | index >= size)
+            throw new IndexOutOfBoundsException();
+
+        Layer currentLayer = firstLayer;
+
+        for(int i = 0; i< index; ++i)
+        {
+            currentLayer.setActivation(e);
             currentLayer = currentLayer.next;
         }
     }

@@ -39,7 +39,7 @@ public enum Activation
         double apply(double value) 
         {
             value = Math.floor(value);
-            if(value == 1) 
+            if(value <= 1) 
                 return 1.0;
             return value % 2 == 0 ?  value/2 : 3*value+1;
         }
@@ -48,7 +48,7 @@ public enum Activation
         double derive(double value) 
         {
             value = Math.floor(value);
-            if(value == 1 )
+            if(value <= 1 )
                 return 0;
             return value % 2 == 0 ? .5 : 3;
         }

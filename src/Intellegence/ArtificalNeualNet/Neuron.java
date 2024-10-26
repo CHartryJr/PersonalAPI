@@ -6,7 +6,6 @@ import java.util.Random;
 class Neuron
 {
     private double weightsIn[];
-    private double weightsOut[];
     private double bias;
     private double output;
     private Random rand;
@@ -14,7 +13,6 @@ class Neuron
     protected Neuron()
     {
         weightsIn = new double[]{0};
-        weightsOut = new double[]{0};
         bias = 0.0d;
         output = 0.0d;
     }
@@ -22,14 +20,13 @@ class Neuron
     /**
      * @apiNote Used to create batch of new In/out weights based off of the number of neurons in the prevous and outer later.
      * @param layerIn
-     * @param layerOut
+ 
      */
-    protected  void init(int layerIn, int layerOut)
+    protected void init(int layerIn)
     {
         rand = new Random();
-        bias =  Math.pow(-1,(rand.nextInt(2)+1))*rand.nextDouble();
+        bias =  Math.pow(-1,(rand.nextInt(2)+1)) * rand.nextDouble();
         weightsIn = randomizedWeightsList(layerIn);
-        weightsOut = randomizedWeightsList(layerOut);
     }
 
     protected double [] randomizedWeightsList(int size)
@@ -37,7 +34,7 @@ class Neuron
         double [] weights = new double[size];
         for (int i = 0; i < size; ++i) 
         {
-            weights[i] = Math.pow(-1,(rand.nextInt(2)+1))*rand.nextDouble();
+            weights[i] = Math.pow(-1,(rand.nextInt(2)+1)) * rand.nextDouble();
         }
         return weights;
     }
@@ -49,26 +46,13 @@ class Neuron
     {
         return weightsIn;
     }
+
     /**
      * @param weightsIn the weightsIn to set
      */
     protected void setWeightsIn(double[] weightsIn) 
     {
         this.weightsIn = weightsIn;
-    }
-    /**
-     * @return the weightsOut
-     */
-    protected double[] getWeightsOut() 
-    {
-        return weightsOut;
-    }
-    /**
-     * @param weightsOut the weightsOut to set
-     */
-    protected void setWeightsOut(double[] weightsOut)
-    {
-        this.weightsOut = weightsOut;
     }
 
     /**
@@ -93,7 +77,7 @@ class Neuron
      * @return  summation of neuron's output weight(index)
      * @implNote Z = Summation (Wi + Xi) + b, Z is what we are returning
      */
-    public double summation(double[] inputs) 
+    protected double summation(double[] inputs) 
     {
         if (inputs.length != weightsIn.length)  
         {

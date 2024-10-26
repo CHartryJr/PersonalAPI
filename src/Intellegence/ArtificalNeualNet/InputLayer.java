@@ -18,7 +18,7 @@ public class InputLayer extends Layer
     @Override
     void init() 
     {
-        this.neurons.forEach(neuron -> neuron.init(neurons.size(), next.neurons.size()));
+        this.neurons.forEach(neuron -> neuron.init(neurons.size()));
     }
     
     /**
@@ -35,12 +35,14 @@ public class InputLayer extends Layer
     @Override
     void Activate() 
     {
-        for(int i = 0; i <  currerntInput.length; ++i)
+        for(Neuron x : neurons)
         {
-           for(Neuron x : neurons)
-           {
-                x.setOutput( x.getOutput() + (x.getWeightsIn()[i] * currerntInput[i]));
-           }
+            double net = 0.0d;
+            for(int i = 0; i <  currerntInput.length; ++i)
+            {
+                net += x.getWeightsIn()[i] * currerntInput[i];
+            }
+            x.setOutput(activation.apply(net + x.getBias()));
         }
     }
 }
