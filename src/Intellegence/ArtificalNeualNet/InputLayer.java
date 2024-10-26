@@ -26,7 +26,7 @@ public class InputLayer extends Layer
     */
    protected void setInputRep(double[] inputRep) 
    {
-        if( currerntInput.length != neurons.get(0).getWeightsIn().length)
+        if( inputRep.length != neurons.get(0).getWeightsIn().length)
             neurons.forEach(neuron -> neuron.setWeightsIn(neuron.randomizedWeightsList(inputRep.length)));
 
         currerntInput = inputRep;
