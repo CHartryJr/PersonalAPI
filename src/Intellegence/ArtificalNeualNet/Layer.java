@@ -11,7 +11,7 @@ abstract class Layer
     protected ArrayList<Neuron> neurons = new ArrayList<Neuron>();
     protected Activation activation = Activation.RECTIFIED_LINEAR_UNIT;
     abstract void init();
-    abstract void  Activate();
+    abstract void  activate();
 
     public Layer(int numberOfNeurons)
     {
@@ -64,7 +64,7 @@ abstract class Layer
             Neuron temp = neurons.get(i);
             message.append(String.format("> NEURON %d <\n\n WEIGHTS: [ ", i + 1));
 
-            for (double w : temp.getWeightsIn()) 
+            for (double w : temp.getWeights()) 
             {
                 message.append(w).append("  ");
             }

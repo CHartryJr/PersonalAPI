@@ -27,7 +27,7 @@ public class OutputLayer extends Layer
     }
 
     @Override
-    void Activate() 
+    void activate() 
     {
         if( prev == null)
             throw new UnsupportedOperationException("There are no linked layers to tghe output layer look over network");
@@ -38,7 +38,7 @@ public class OutputLayer extends Layer
             for(int i = 0; i <  prev.neurons.size(); ++i)
             {
                 double input = prev.neurons.get(i).getOutput();
-                net += (x.getWeightsIn()[i] * input);
+                net += (x.getWeights()[i] * input);
             }
             x.setOutput(activation.apply(net + x.getBias()));
         }

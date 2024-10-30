@@ -10,16 +10,18 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
 {
     private InputLayer firstLayer;
     private OutputLayer lastLayer;
-    private double fitness;
+    private double fitness,MSE,learningRate;
     private final int MAX_NUMBER_NEURONS;
     private int numberOfInputs,numberOfHiddenLayers,numberOfOutPuts,size;
-    private double learningRate = .001d;
+    
 
     public NeualNet(int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts)
     {
         MAX_NUMBER_NEURONS = 5;
         size = 0;
         fitness = -1.0d;
+        MSE = 0.0d;
+        learningRate = .001d;
         this.numberOfHiddenLayers = numberOfHiddenLayers;
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
@@ -34,6 +36,8 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         MAX_NUMBER_NEURONS = maxNumOfNuerons;
         size = 0;
         fitness = -1.0d;
+        MSE =0.0d;
+        learningRate = .001d;
         this.numberOfHiddenLayers = numberOfHiddenLayers;
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
@@ -54,7 +58,11 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     {
         firstLayer.setInputRep(parsept);
     }
-
+/**
+ * @apiNote This function is used to take in a input and prepare the network
+ * @param parsept
+ * @implNote Warnning!!! Changing shape of the input will result in a Changing input weights
+ */
     public void observe(double[][]parsept) 
     {
         double [] convertedParsept = flatten(parsept);
@@ -66,9 +74,17 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         Layer currentLayer  = firstLayer;
         while(currentLayer != null)
         {
-            currentLayer.Activate();
+            currentLayer.activate();
             currentLayer = currentLayer.next;
         }
+    }
+
+    public void backPropogate( double [] expecting )
+    {
+        if(expecting.length != lastLayer.neurons.size())
+            throw new IndexOutOfBoundsException("expected size dose not match output size");
+        setMSE(expecting);
+        gradientDecent(expecting);
     }
 
     public void  setActivation(Activation e)
@@ -104,7 +120,14 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         return lastLayer.getCurrentOutput();
     } 
 
-
+    /**
+     * @return the mSE
+     */
+    public double getError() 
+    {
+        return MSE;
+    }
+    
     @Override
     public String toString()
     {
@@ -122,21 +145,68 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     public int compareTo(NeualNet o) 
     {
         int flag = 0;
-        if(this.fitness < o.fitness)
+        if( this.fitness < o.fitness )
         {
             flag = -1;
         }
-         else if (this.fitness > o.fitness)
+         else if ( this.fitness > o.fitness )
         {
             flag = 1;
         }
-         else if (this.fitness == o.fitness)
+         else if ( this.fitness == o.fitness )
         {
-            flag = 0;
+            if( this.MSE < o.MSE)
+            {
+                flag = 1;
+            }
+             else if ( this.MSE > o.MSE )
+            {
+                flag = -1;
+            }
+            else if ( this.MSE == o.MSE )
+            {
+                flag = 0; 
+            }
         }
         return flag;
     }
 
+    private void gradientDecent(double [] expected)
+    {
+        Layer currentLayer = lastLayer;
+        double deriveMSE = getMSEDerive(expected);
+
+        while(currentLayer != null )
+        {
+            for (int i =0; i < currentLayer.neurons.size(); ++i) 
+            {
+                Neuron currentNeuron   = currentLayer.neurons.get(i);
+                double out = currentNeuron.getOutput();
+                double deltaOver = deriveMSE  * currentLayer.activation.derive(out);
+
+                for(int j = 0; j < currentNeuron.getWeights().length; ++j)
+                {
+                    if(currentLayer == lastLayer)
+                    {
+                        double delta = -2 * (out - expected[i]) * currentLayer.activation.derive(out);
+                        currentNeuron.getWeights()[j] = currentNeuron.getWeights()[j] - learningRate * ( delta * currentLayer.prev.neurons.get(j).getOutput());
+                        currentNeuron.setBias(currentNeuron.getBias() - (delta));
+                    }
+                     else if(currentLayer == firstLayer)
+                    {
+                        currentNeuron.getWeights()[j] = currentNeuron.getWeights()[j] - learningRate * ( deltaOver * firstLayer.getCurrentInput()[j]);
+                        currentNeuron.setBias(currentNeuron.getBias() - (deltaOver));
+                    }
+                    else
+                    {
+                        currentNeuron.getWeights()[j] = currentNeuron.getWeights()[j] - learningRate * ( deltaOver * currentLayer.prev.neurons.get(j).getOutput());
+                        currentNeuron.setBias(currentNeuron.getBias() - (deltaOver));
+                    }
+                } 
+            }
+            currentLayer = currentLayer.prev;
+        }
+    }
 
     private void init()
     {
@@ -163,6 +233,27 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         lastLayer.prev = currentLayer; 
         lastLayer.init();
     }
+
+    private void setMSE( double [] expected )
+    {
+        MSE = 0.0d;
+        for(int i = 0; i <lastLayer.neurons.size(); ++i)
+        {
+            MSE += Math.pow((expected[i] - lastLayer.neurons.get(i).getOutput()),2);        
+        } 
+        MSE /= lastLayer.neurons.size();
+    }   
+
+    private double getMSEDerive( double [] expected )
+    {
+        double derivatative = 0.0d;
+        for(int i = 0; i < lastLayer.neurons.size(); ++i)
+        {
+            derivatative += (expected[i] - lastLayer.neurons.get(i).getOutput());        
+        } 
+        derivatative *= -2/lastLayer.neurons.size();
+        return derivatative;
+    }   
 
     private double[] flatten(double[][] parsept) 
     {

@@ -42,7 +42,7 @@ class Neuron
     /**
      * @return the weightsIn
      */
-    protected double[] getWeightsIn() 
+    protected double[] getWeights() 
     {
         return weightsIn;
     }
