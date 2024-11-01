@@ -31,7 +31,7 @@ abstract class Layer
     public void printLayerInfo()
     {
       String message = String.format(this+"\n Prevous Layer Size: %d and Next Layer Size: %d ",
-      prev ==null ? 0 : prev.neurons.size()
+      prev == null ? 0 : prev.neurons.size()
       ,next == null ? 0 : next.neurons.size());
       System.out.println(message);
     }
@@ -39,6 +39,7 @@ abstract class Layer
     /**
      * @return the activation
      */
+    
     public Activation getActivation() 
     {
         return activation;

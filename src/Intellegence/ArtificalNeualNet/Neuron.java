@@ -6,8 +6,7 @@ import java.util.Random;
 class Neuron
 {
     private double weightsIn[];
-    private double bias;
-    private double output;
+    private double bias, output, delta, net;
     private Random rand;
 
     protected Neuron()
@@ -15,6 +14,8 @@ class Neuron
         weightsIn = new double[]{0};
         bias = 0.0d;
         output = 0.0d;
+        net = 0.0d;
+        delta = 0.0d;
     }
    
     /**
@@ -111,4 +112,35 @@ class Neuron
     {
         this.output = output;
     }
+
+    /**
+     * @return the delta
+     */
+    protected double getDelta() {
+        return delta;
+    }
+
+    /**
+     * @param delta the delta to set
+     */
+    protected void setDelta(double delta) {
+        this.delta = delta;
+    }
+
+    /**
+     * @return the net
+     */
+    protected double getNet() {
+        return net;
+    }
+
+    /**
+     * @param net the net to set
+     */
+    protected void setNet(double net) {
+        this.net = net;
+    }
+
+
+    
 }

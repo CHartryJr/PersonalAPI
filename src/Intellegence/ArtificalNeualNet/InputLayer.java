@@ -46,6 +46,7 @@ public class InputLayer extends Layer
             {
                 net += x.getWeights()[i] * currerntInput[i];
             }
+            x.setNet(net);
             x.setOutput(activation.apply(net + x.getBias()));
         }
     }

@@ -27,6 +27,7 @@ public class HiddenLayer extends Layer
                 double input = prev.neurons.get(i).getOutput() ;
                 net += (x.getWeights()[i] * input);
             }
+            x.setNet(net);
             x.setOutput(activation.apply(net + x.getBias()));
         }
     }
