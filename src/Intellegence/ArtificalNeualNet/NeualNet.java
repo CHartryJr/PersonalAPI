@@ -20,7 +20,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         size = 0;
         fitness = -1.0d;
         MSE = 0.0d;
-        learningRate = .0001d;
+        learningRate = 1E-6;
         this.numberOfHiddenLayers = numberOfHiddenLayers;
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
@@ -65,8 +65,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
      */
     public void observe(double[][]parsept) 
     {
-        double [] convertedParsept = flatten(parsept);
-        firstLayer.setInputRep(convertedParsept);
+        observe(flatten(parsept));
     }
 
     public void forward()
@@ -77,6 +76,11 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
             currentLayer.activate();
             currentLayer = currentLayer.next;
         }
+    }
+
+    public void train(int regiment, double [][] expected )
+    { 
+        train(regiment, flatten(expected));
     }
 
     public void train(int regiment, double [] expected )
@@ -260,7 +264,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         MSE = 0.0d;
         for(int i = 0; i <lastLayer.neurons.size(); ++i)
         {
-            MSE += Math.pow((expected[i] - lastLayer.neurons.get(i).getOutput()),2);        
+            MSE += Math.pow(expected[i] - lastLayer.neurons.get(i).getOutput(),2);        
         } 
         MSE =  MSE  * 1/lastLayer.neurons.size();
     }   
@@ -279,4 +283,14 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         }
         return flatArray;
     }
+
+    // private double truncate(double value, int decimalPlaces) 
+    //{
+    //     if (decimalPlaces < 0) 
+    //         throw new IllegalArgumentException("Decimal places must be non-negative");
+
+    //     double scaleFactor = Math.pow(10, decimalPlaces);
+    //     return Math.floor(value * scaleFactor) / scaleFactor;
+    // }
+
 } 
