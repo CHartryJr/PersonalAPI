@@ -2,11 +2,12 @@ package Intellegence.ArtificalNeualNet;
 
 public class OutputLayer extends Layer
 {
-    
+    int precision;
 
      public OutputLayer(int numberOfOutputs)
     {
         super(numberOfOutputs);
+        precision = 6;
     }
 
     @Override
@@ -21,7 +22,7 @@ public class OutputLayer extends Layer
         double[] currentOutput = new double[neurons.size()];
         for(int i = 0; i < neurons.size(); ++i)
         {
-            currentOutput[i] = neurons.get(i).getOutput();
+            currentOutput[i] = truncate( neurons.get(i).getOutput());
         }
         return currentOutput;
     }
@@ -43,6 +44,25 @@ public class OutputLayer extends Layer
             x.setNet(net);
             x.setOutput(activation.apply(net + x.getBias()));
         }
+    }
+
+    private double truncate(double value) 
+    {
+        if (precision < 0) 
+            throw new IllegalArgumentException("Decimal places must be non-negative");
+
+        double scaleFactor = Math.pow(10, precision);
+        return Math.floor(value * scaleFactor) / scaleFactor;
+    }
+
+    public int getPrecision() 
+    {
+      return precision;
+    }
+
+    public void setPrecision(int precision)
+    {
+        this.precision = precision;
     }
 
 }

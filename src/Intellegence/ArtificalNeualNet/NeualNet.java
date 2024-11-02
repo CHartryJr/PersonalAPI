@@ -12,15 +12,16 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     private OutputLayer lastLayer;
     private double fitness,MSE,learningRate;
     private final int MAX_NUMBER_NEURONS;
-    private int numberOfInputs,numberOfHiddenLayers,numberOfOutPuts,size;
+    private int numberOfInputs, numberOfHiddenLayers, numberOfOutPuts, size;
     
-    public NeualNet(int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts)
+    public NeualNet( int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts )
     {
+       
         MAX_NUMBER_NEURONS = 5;
         size = 0;
         fitness = -1.0d;
         MSE = 0.0d;
-        learningRate = 1E-6;
+        learningRate = 1E-3;
         this.numberOfHiddenLayers = numberOfHiddenLayers;
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
@@ -28,7 +29,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         init();
     }
 
-    public NeualNet(int numberOfInputs,int numberOfHiddenLayers,int numberOfOutPuts,int maxNumOfNuerons)
+    public NeualNet( int numberOfInputs,int numberOfHiddenLayers,int numberOfOutPuts,int maxNumOfNuerons )
     {
         if(maxNumOfNuerons < 1)
             throw new IndexOutOfBoundsException("Invalid Number of Nuerons");
@@ -36,7 +37,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         size = 0;
         fitness = -1.0d;
         MSE =0.0d;
-        learningRate = .0001d;
+        learningRate =  1E-3;
         this.numberOfHiddenLayers = numberOfHiddenLayers;
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
@@ -66,6 +67,48 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     public void observe(double[][]parsept) 
     {
         observe(flatten(parsept));
+    }
+
+    /**
+     * @return the fitness
+     */
+    public double getFitness() {
+        return fitness;
+    }
+
+    /**
+     * @param fitness the fitness to set
+     */
+    public void setFitness(double fitness) {
+        this.fitness = fitness;
+    }
+
+    /**
+     * @return the learningRate
+     */
+    public double getLearningRate() {
+        return learningRate;
+    }
+
+    /**
+     * @param learningRate the learningRate to set
+     */
+    public void setLearningRate(double learningRate) {
+        this.learningRate = learningRate;
+    }
+
+    /**
+     * @return the precision
+     */
+    public int getPrecision() {
+        return lastLayer.getPrecision();
+    }
+
+    /**
+     * @param precision the precision to set
+     */
+    public void setPrecision(int precision) {
+        lastLayer.setPrecision(precision);
     }
 
     public void forward()
@@ -204,7 +247,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         }
     }
 
-    private  void backPropogate( double [] expected )
+    private void backPropogate( double [] expected )
     {
         Layer currentLayer = lastLayer;
 
@@ -242,14 +285,13 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         currentLayer.prev = firstLayer;
         firstLayer.init();
         size = 3;
-        int i = 1;
-        while(i < numberOfHiddenLayers)
+      
+        for(int i = 0 ;i < numberOfHiddenLayers; ++i)
         {
             currentLayer.next = new HiddenLayer(rand.nextInt(MAX_NUMBER_NEURONS) + 1);
             currentLayer.init();
             currentLayer.next.prev = currentLayer;
             currentLayer = currentLayer.next;
-            ++i;
             ++size;
         }
         lastLayer = new OutputLayer(numberOfOutPuts);
@@ -269,7 +311,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         MSE =  MSE  * 1/lastLayer.neurons.size();
     }   
 
-    private double[] flatten(double[][] parsept) 
+    private double[] flatten( double[][] parsept ) 
     {
         int rows = parsept.length;
         int cols = parsept[0].length;
@@ -283,14 +325,4 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         }
         return flatArray;
     }
-
-    // private double truncate(double value, int decimalPlaces) 
-    //{
-    //     if (decimalPlaces < 0) 
-    //         throw new IllegalArgumentException("Decimal places must be non-negative");
-
-    //     double scaleFactor = Math.pow(10, decimalPlaces);
-    //     return Math.floor(value * scaleFactor) / scaleFactor;
-    // }
-
 } 
