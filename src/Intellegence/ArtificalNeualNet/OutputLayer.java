@@ -22,7 +22,7 @@ public class OutputLayer extends Layer
         double[] currentOutput = new double[neurons.size()];
         for(int i = 0; i < neurons.size(); ++i)
         {
-            currentOutput[i] = truncate( neurons.get(i).getOutput());
+            currentOutput[i] = neurons.get(i).getOutput();
         }
         return currentOutput;
     }
@@ -42,7 +42,7 @@ public class OutputLayer extends Layer
                 net += (x.getWeights()[i] * input);
             }
             x.setNet(net);
-            x.setOutput(activation.apply(net + x.getBias()));
+            x.setOutput(truncate(activation.apply(net + x.getBias())));
         }
     }
 
