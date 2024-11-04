@@ -1,4 +1,4 @@
-package intellegence.artifical_neualnet;
+package intellegence.artifical_neuralnet;
 import java.io.Serializable;
 import java.util.Random;
 

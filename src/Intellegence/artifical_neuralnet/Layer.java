@@ -1,4 +1,4 @@
-package intellegence.artifical_neualnet;
+package intellegence.artifical_neuralnet;
 import java.util.ArrayList;
 /**
  * Layer class to immplement the layer sturcture in Neural Networks
