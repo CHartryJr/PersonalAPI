@@ -1,4 +1,4 @@
-package Intellegence.ArtificalNeualNet;
+package intellegence.artifical_neualnet;
 import java.util.Random;
 /**
  * Neuron class to 

@@ -1,4 +1,4 @@
-package Intellegence.ArtificalNeualNet;
+package intellegence.artifical_neualnet;
 
 public class OutputLayer extends Layer
 {

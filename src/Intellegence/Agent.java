@@ -1,4 +1,4 @@
-package Intellegence;
+package intellegence;
 /**
  * class uses to implement models.
  */

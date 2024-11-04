@@ -1,12 +1,14 @@
-package Intellegence.ArtificalNeualNet;
-import Intellegence.Encephalon;
+package intellegence.artifical_neualnet;
+import java.io.Serializable;
 import java.util.Random;
+
+import intellegence.Encephalon;
 
 /**
  *  This a low scale mock of a neual network that show my understanding of simple ANN.
  * @author Carl Hartry Jr.
  */
-public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
+public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Serializable
 {
     private InputLayer firstLayer;
     private OutputLayer lastLayer;
@@ -36,7 +38,7 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         MAX_NUMBER_NEURONS = maxNumOfNuerons;
         size = 0;
         fitness = -1.0d;
-        MSE =0.0d;
+        MSE =  0.0d;
         learningRate =  1E-3;
         this.numberOfHiddenLayers = numberOfHiddenLayers;
         this.numberOfOutPuts = numberOfOutPuts;
@@ -51,6 +53,84 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     public int getSize() 
     {
         return size;
+    }
+
+    public HiddenLayer removeHiddenLayer(int index)
+    {
+        if(size == 2 | index < 0 | index >= size | index + 1 == size - 1)
+            throw new IndexOutOfBoundsException();
+        Layer currentLayer  = firstLayer.next;
+        for(int i = 0; i < index; ++i)
+        {
+            currentLayer = currentLayer.next;
+        } 
+        currentLayer.prev.next = currentLayer.next;
+        currentLayer.next.prev = currentLayer.prev;
+        currentLayer.next.init();
+        currentLayer.next = null;
+        currentLayer.prev = null;
+        --size;
+        return (HiddenLayer)currentLayer;
+    }
+
+    public Layer removeHiddenLayer()
+    {
+        return removeHiddenLayer(0);
+    }
+
+    public void addHiddenLayer(int index, HiddenLayer newLayer)
+    {
+        if(index < 0 | index >= size | index == size - 1)
+            throw new IndexOutOfBoundsException();
+            Layer currentLayer  = firstLayer;
+            for(int i = 0; i < index; ++i)
+            {
+                currentLayer = currentLayer.next;
+            } 
+            newLayer.next = currentLayer.next;
+            newLayer.prev = currentLayer;
+            currentLayer.next = newLayer;
+            newLayer.next.prev = newLayer;
+            newLayer.init();
+            newLayer.next.init();
+            ++size;   
+    }
+
+    public void addHiddenLayer(HiddenLayer newLayer)
+    {
+        addHiddenLayer(0,newLayer);
+    }
+
+    public HiddenLayer getHiddenLayer(int index)
+    {
+        if(index < 0 | index >= size | index == size - 1)
+            throw new IndexOutOfBoundsException();
+        Layer currentLayer = firstLayer.next;
+        for(int i =0; i < index;++i)
+        {
+            currentLayer = currentLayer.next;
+        }
+        return (HiddenLayer)currentLayer;
+    }
+
+    public HiddenLayer replace(int index, Layer newLayer)
+    {
+        if(size == 2 | index < 0 | index >= size | index + 1 == size - 1)
+            throw new IndexOutOfBoundsException();
+        Layer currentLayer  = firstLayer.next;
+        for(int i = 0; i < index; ++i)
+        {
+            currentLayer = currentLayer.next;
+        } 
+        newLayer.prev = currentLayer.prev;
+        newLayer.prev.next = newLayer;
+        newLayer.next = currentLayer.next;
+        newLayer.next.prev = newLayer;
+        currentLayer.next = null;
+        currentLayer.prev = null;
+        newLayer.next.init();
+        newLayer.init();
+        return (HiddenLayer)currentLayer;
     }
 
     @Override
@@ -95,13 +175,6 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
      */
     public void setLearningRate(double learningRate) {
         this.learningRate = learningRate;
-    }
-
-    /**
-     * @return the precision
-     */
-    public int getPrecision() {
-        return lastLayer.getPrecision();
     }
 
     /**
@@ -280,12 +353,8 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
     {
         Random rand = new Random(System.currentTimeMillis());
         firstLayer = new InputLayer(numberOfInputs);
-        Layer currentLayer = new HiddenLayer(rand.nextInt(MAX_NUMBER_NEURONS) + 1);
-        firstLayer.next = currentLayer;
-        currentLayer.prev = firstLayer;
-        firstLayer.init();
-        size = 3;
-      
+        Layer currentLayer = firstLayer;
+        size = 2;
         for(int i = 0 ;i < numberOfHiddenLayers; ++i)
         {
             currentLayer.next = new HiddenLayer(rand.nextInt(MAX_NUMBER_NEURONS) + 1);
@@ -325,4 +394,6 @@ public class NeualNet implements Encephalon<double[]>,Comparable<NeualNet>
         }
         return flatArray;
     }
+
+   
 } 
