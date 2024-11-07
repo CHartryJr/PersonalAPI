@@ -1,18 +1,25 @@
-## Getting Started
+# Personal API
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Intellegence](#Intellegence)
+- [Contributing](#contributing)
 
-## Folder Structure
 
-The workspace contains two folders by default, where:
+## Project Overview
+This is Just a collection of Personal API's. Most API's created will be used to model Various Machine Learning Alogrithims for a better understanding of the concept.
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+## Intellegence
+    The intellegence Package is where my machine Learning algorithms will reside. 
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+ Sections
+- [Neural Network](#Neural-Network)
 
-## Dependency Management
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+    ## Neural Network
+        An object-oriented mock of a Neural Network that Uses graidient descent for training.
+
+
+## Contributing
+    Carl Hartry Jr. 

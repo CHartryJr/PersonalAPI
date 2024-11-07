@@ -1,4 +1,4 @@
-package intellegence.artifical_neuralnet;
+package intellegence.neuralnet;
 import java.util.Random;
 /**
  * Neuron class to 
@@ -26,7 +26,7 @@ class Neuron
     protected void init(int layerIn)
     {
         rand = new Random();
-        bias =  Math.pow(-1,(rand.nextInt(2)+1)) * rand.nextDouble();
+        bias = rand.nextDouble(2) - 1;
         weightsIn = randomizedWeightsList(layerIn);
     }
 
@@ -35,7 +35,7 @@ class Neuron
         double [] weights = new double[size];
         for (int i = 0; i < size; ++i) 
         {
-            weights[i] = Math.pow(-1,(rand.nextInt(2)+1)) * rand.nextDouble();
+            weights[i] = rand.nextDouble(2) - 1;
         }
         return weights;
     }
@@ -116,31 +116,32 @@ class Neuron
     /**
      * @return the delta
      */
-    protected double getDelta() {
+    protected double getDelta()
+    {
         return delta;
     }
 
     /**
      * @param delta the delta to set
      */
-    protected void setDelta(double delta) {
+    protected void setDelta(double delta) 
+    {
         this.delta = delta;
     }
 
     /**
      * @return the net
      */
-    protected double getNet() {
+    protected double getNet()
+     {
         return net;
     }
 
     /**
      * @param net the net to set
      */
-    protected void setNet(double net) {
+    protected void setNet(double net) 
+    {
         this.net = net;
-    }
-
-
-    
+    } 
 }

@@ -1,4 +1,4 @@
-package intellegence.artifical_neuralnet;
+package intellegence.neuralnet;
 import java.io.Serializable;
 import java.util.Random;
 
@@ -12,6 +12,7 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
 {
     private InputLayer firstLayer;
     private OutputLayer lastLayer;
+    private  Random rand;
     private double fitness,MSE,learningRate;
     private final int MAX_NUMBER_NEURONS;
     private int numberOfInputs, numberOfHiddenLayers, numberOfOutPuts, size;
@@ -53,6 +54,29 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
     public int getSize() 
     {
         return size;
+    }
+
+
+    /**
+     * @apiNote This function is used to make a slight change to each weight and bias in the network
+     */
+    public void  mutate()
+    {
+        Layer cuLayer = firstLayer;
+        rand = new Random(System.currentTimeMillis());
+
+        while(cuLayer != null)
+        {
+            for(Neuron n : cuLayer.neurons)
+            {
+                for(double d: n.getWeights())
+                {
+                    d = transform(d);
+                }
+                n.setBias(transform(n.getBias()));
+            }
+            cuLayer = cuLayer.next;
+        }
     }
 
     public HiddenLayer removeHiddenLayer(int index)
@@ -351,7 +375,7 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
 
     private void init()
     {
-        Random rand = new Random(System.currentTimeMillis());
+       rand = new Random(System.currentTimeMillis());
         firstLayer = new InputLayer(numberOfInputs);
         Layer currentLayer = firstLayer;
         size = 2;
@@ -368,6 +392,20 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
         currentLayer.init();
         lastLayer.prev = currentLayer; 
         lastLayer.init();
+    }
+
+    private  double transform(double d )
+    {
+        double threshold = rand.nextDouble();
+        if( threshold < .2 )
+            d = -d;
+        else if ( threshold < .4 )
+            d  = rand.nextDouble(2.0d) - 1.0d; 
+        else if ( threshold < .6 )
+            d /= (1 / rand.nextInt(100));
+        else if ( threshold < .8 )
+            d *= (1 / rand.nextInt(100));
+        return d;
     }
 
     private void setMSE( double [] expected )

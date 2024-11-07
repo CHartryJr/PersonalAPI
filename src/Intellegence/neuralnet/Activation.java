@@ -1,4 +1,4 @@
-package intellegence.artifical_neuralnet;
+package intellegence.neuralnet;
 
 public enum Activation 
 {
