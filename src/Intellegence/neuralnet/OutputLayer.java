@@ -1,6 +1,7 @@
 package intellegence.neuralnet;
 
-public class OutputLayer extends Layer
+
+public class OutputLayer extends Layer 
 {
     int precision;
 

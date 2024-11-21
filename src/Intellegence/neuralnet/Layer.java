@@ -1,10 +1,11 @@
 package intellegence.neuralnet;
+import java.io.Serializable;
 import java.util.ArrayList;
 /**
  * Layer class to immplement the layer sturcture in Neural Networks
  * @author Carl Hartry jr.
  */
-abstract class Layer
+abstract class Layer implements Serializable
 {
     protected Layer prev = null;
     protected Layer next = null;

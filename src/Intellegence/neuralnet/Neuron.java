@@ -1,9 +1,10 @@
 package intellegence.neuralnet;
+import java.io.Serializable;
 import java.util.Random;
 /**
  * Neuron class to 
  */
-class Neuron
+class Neuron implements Serializable
 {
     private double weightsIn[];
     private double bias, output, delta, net;

@@ -1,6 +1,7 @@
 package intellegence.neuralnet;
 
-public class InputLayer extends Layer
+
+public class InputLayer extends Layer 
 {
     private  double [] currerntInput;
 

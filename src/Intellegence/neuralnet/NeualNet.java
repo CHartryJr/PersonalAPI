@@ -5,8 +5,9 @@ import java.util.Random;
 import intellegence.Encephalon;
 
 /**
- *  This a low scale mock of a neual network that show my understanding of simple ANN.
- * @author Carl Hartry Jr.
+ *  @implNote This is a mock of a Artifical Neural Network.
+ *  @apiNote Implements Encephalon Comparable and Serializable.
+ *  @author Carl Hartry Jr.
  */
 public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Serializable
 {
@@ -17,21 +18,14 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
     private final int MAX_NUMBER_NEURONS;
     private int numberOfInputs, numberOfHiddenLayers, numberOfOutPuts, size;
     
-    public NeualNet( int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts )
-    {
-       
-        MAX_NUMBER_NEURONS = 5;
-        size = 0;
-        fitness = -1.0d;
-        MSE = 0.0d;
-        learningRate = 1E-3;
-        this.numberOfHiddenLayers = numberOfHiddenLayers;
-        this.numberOfOutPuts = numberOfOutPuts;
-        this.numberOfInputs = numberOfInputs;
-        firstLayer  = null;
-        init();
-    }
-
+    /**
+     * 
+     * @param numberOfInputs
+     * @param numberOfHiddenLayers
+     * @param numberOfOutPuts
+     * @param maxNumOfNuerons
+     * @Author Carl Hartry Jr.
+     */
     public NeualNet( int numberOfInputs,int numberOfHiddenLayers,int numberOfOutPuts,int maxNumOfNuerons )
     {
         if(maxNumOfNuerons < 1)
@@ -48,7 +42,26 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
         init();
     }
 
-   
+    /**
+     * 
+     * @param numberOfInputs
+     * @param numberOfHiddenLayers
+     * @param numberOfOutPuts
+     * @apiNote maxNumNeuron = 5
+     */
+    public NeualNet( int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts )
+    {
+        this( numberOfInputs,numberOfHiddenLayers,numberOfOutPuts,5 );
+    }
+
+    /**
+     *  Defualt contructor input is one neuron  and output one neuron
+     */
+    public NeualNet()
+    {
+        this( 1,0,1,1 );
+    }
+
     /**
      * @return the size
      */
@@ -332,10 +345,10 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
          try
         {   
             //Saving of object in a file
-            FileOutputStream file = new FileOutputStream(loc);
+            FileOutputStream file = new FileOutputStream(loc +".annObj");
             ObjectOutputStream out = new ObjectOutputStream(file);
             // Method for serialization of object
-            out.writeObject(loc);
+            out.writeObject(this);
             out.close();
             file.close();
             return true;
@@ -352,7 +365,7 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
          try
         {   
             //Saving of object in a file
-            FileInputStream file = new FileInputStream(loc);
+            FileInputStream file = new FileInputStream(loc+".annObj");
             ObjectInputStream out = new ObjectInputStream(file);
             // Method for serialization of object
             NeualNet temp = (NeualNet)out.readObject();
@@ -404,7 +417,7 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
 
         while(currentLayer != null )
         {
-            for (int j =0; j < currentLayer.neurons.size(); ++j) 
+            for (int j = 0; j < currentLayer.neurons.size(); ++j) 
             {
                 Neuron currentNeuron = currentLayer.neurons.get(j);
                 double net = currentNeuron.getNet(), currentActDerivative = currentLayer.activation.derive(net) ,  out = currentNeuron.getOutput();

@@ -1,6 +1,6 @@
 package intellegence.neuralnet;
 
-public class HiddenLayer extends Layer
+public class HiddenLayer extends Layer 
 {
     public HiddenLayer(int numberOfNeurons)
     {
