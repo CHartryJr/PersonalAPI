@@ -6,4 +6,5 @@ package intellegence;
 public interface Encephalon <V>
 {  
     void observe(V parsept);
+    V predict();
 } 

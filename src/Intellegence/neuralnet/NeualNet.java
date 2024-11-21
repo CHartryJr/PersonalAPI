@@ -1,5 +1,5 @@
 package intellegence.neuralnet;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Random;
 
 import intellegence.Encephalon;
@@ -12,7 +12,7 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
 {
     private InputLayer firstLayer;
     private OutputLayer lastLayer;
-    private  Random rand;
+    private Random rand;
     private double fitness,MSE,learningRate;
     private final int MAX_NUMBER_NEURONS;
     private int numberOfInputs, numberOfHiddenLayers, numberOfOutPuts, size;
@@ -48,6 +48,7 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
         init();
     }
 
+   
     /**
      * @return the size
      */
@@ -55,7 +56,6 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
     {
         return size;
     }
-
 
     /**
      * @apiNote This function is used to make a slight change to each weight and bias in the network
@@ -176,35 +176,40 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
     /**
      * @return the fitness
      */
-    public double getFitness() {
+    public double getFitness() 
+    {
         return fitness;
     }
 
     /**
      * @param fitness the fitness to set
      */
-    public void setFitness(double fitness) {
+    public void setFitness(double fitness)
+     {
         this.fitness = fitness;
     }
 
     /**
      * @return the learningRate
      */
-    public double getLearningRate() {
+    public double getLearningRate() 
+    {
         return learningRate;
     }
 
     /**
      * @param learningRate the learningRate to set
      */
-    public void setLearningRate(double learningRate) {
+    public void setLearningRate(double learningRate) 
+    {
         this.learningRate = learningRate;
     }
 
     /**
      * @param precision the precision to set
      */
-    public void setPrecision(int precision) {
+    public void setPrecision(int precision) 
+    {
         lastLayer.setPrecision(precision);
     }
 
@@ -322,6 +327,55 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
         return flag;
     }
 
+    public boolean saveStream(String loc)
+    {
+         try
+        {   
+            //Saving of object in a file
+            FileOutputStream file = new FileOutputStream(loc);
+            ObjectOutputStream out = new ObjectOutputStream(file);
+            // Method for serialization of object
+            out.writeObject(loc);
+            out.close();
+            file.close();
+            return true;
+
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+            return false;
+        }
+    }
+    public boolean loadStream(String loc)
+    {
+         try
+        {   
+            //Saving of object in a file
+            FileInputStream file = new FileInputStream(loc);
+            ObjectInputStream out = new ObjectInputStream(file);
+            // Method for serialization of object
+            NeualNet temp = (NeualNet)out.readObject();
+            this.firstLayer = temp.firstLayer;
+            this.lastLayer = temp.lastLayer;
+            this.fitness = temp.fitness;
+            this.MSE = temp.MSE;
+            this.learningRate = temp.learningRate;
+            this.numberOfInputs = temp.numberOfInputs;
+            this.numberOfHiddenLayers = temp.numberOfHiddenLayers;
+            this.numberOfOutPuts = temp.numberOfOutPuts;
+            this.size = temp.size;
+            out.close();
+            file.close();
+            return true;
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+            return false;
+        }
+    }
+
     private void gradientDecent(double [] expected)
     {
         if(expected.length != lastLayer.neurons.size())
@@ -433,5 +487,4 @@ public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Ser
         return flatArray;
     }
 
-   
 } 
