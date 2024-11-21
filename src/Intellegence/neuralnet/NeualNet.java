@@ -1,7 +1,6 @@
 package intellegence.neuralnet;
 import java.io.*;
 import java.util.Random;
-
 import intellegence.Encephalon;
 
 /**
@@ -9,7 +8,7 @@ import intellegence.Encephalon;
  *  @apiNote Implements Encephalon Comparable and Serializable.
  *  @author Carl Hartry Jr.
  */
-public class NeualNet implements Encephalon<double[]>, Comparable<NeualNet>, Serializable
+public class NeualNet implements Encephalon<double[],double[]>, Comparable<NeualNet>, Serializable
 {
     private InputLayer firstLayer;
     private OutputLayer lastLayer;

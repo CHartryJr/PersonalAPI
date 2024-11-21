@@ -3,8 +3,8 @@ package intellegence;
 /**
  * This function will be used to input data into various modles.
  */
-public interface Encephalon <V>
+public interface Encephalon <T,R>
 {  
-    void observe(V parsept);
-    V predict();
+    void observe(T parsept);
+    R predict();
 } 
