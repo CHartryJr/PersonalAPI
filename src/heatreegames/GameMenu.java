@@ -14,7 +14,7 @@ public class GameMenu extends GameScene
     private final String gamesFolder = System.getProperty("user.dir")+"/src/heatreegames/games"; // Adjust path as needed
     private boolean showingCredits = false;
 
-    public GameMenu(GameFrame parentFrame) 
+     public GameMenu(GameFrame parentFrame) 
     {
         super(parentFrame);
         this.gameNames = new ArrayList<>();
@@ -49,7 +49,7 @@ public class GameMenu extends GameScene
                 for (File file : files) 
                 {
                     // Debugging: Print the file names and check if they're directories
-                    System.out.println("Found file: " + file.getName() + ", isDirectory: " + file.isDirectory());
+                  //  System.out.println("Found file: " + file.getName() + ", isDirectory: " + file.isDirectory());
                     if (!file.isDirectory()) 
                     {
                         gameNames.add(file.getName());  // Add only directories to the list

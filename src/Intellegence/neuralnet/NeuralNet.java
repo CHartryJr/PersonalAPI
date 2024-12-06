@@ -8,7 +8,7 @@ import intellegence.Encephalon;
  *  @apiNote Implements Encephalon Comparable and Serializable.
  *  @author Carl Hartry Jr.
  */
-public class NeualNet implements Encephalon<double[],double[]>, Comparable<NeualNet>, Serializable
+public class NeuralNet implements Encephalon<double[],double[]>, Comparable<NeuralNet>, Serializable
 {
     private InputLayer firstLayer;
     private OutputLayer lastLayer;
@@ -25,7 +25,7 @@ public class NeualNet implements Encephalon<double[],double[]>, Comparable<Neual
      * @param maxNumOfNuerons
      * @Author Carl Hartry Jr.
      */
-    public NeualNet( int numberOfInputs,int numberOfHiddenLayers,int numberOfOutPuts,int maxNumOfNuerons )
+    public NeuralNet( int numberOfInputs,int numberOfHiddenLayers,int numberOfOutPuts,int maxNumOfNuerons )
     {
         if(maxNumOfNuerons < 1)
             throw new IndexOutOfBoundsException("Invalid Number of Nuerons");
@@ -48,7 +48,7 @@ public class NeualNet implements Encephalon<double[],double[]>, Comparable<Neual
      * @param numberOfOutPuts
      * @apiNote maxNumNeuron = 5
      */
-    public NeualNet( int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts )
+    public NeuralNet( int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts )
     {
         this( numberOfInputs,numberOfHiddenLayers,numberOfOutPuts,5 );
     }
@@ -56,7 +56,7 @@ public class NeualNet implements Encephalon<double[],double[]>, Comparable<Neual
     /**
      *  Defualt contructor input is one neuron  and output one neuron
      */
-    public NeualNet()
+    public NeuralNet()
     {
         this( 1,0,1,1 );
     }
@@ -310,7 +310,7 @@ public class NeualNet implements Encephalon<double[],double[]>, Comparable<Neual
     }
 
     @Override
-    public int compareTo(NeualNet o) 
+    public int compareTo(NeuralNet o) 
     {
         int flag = 0;
         if( this.fitness < o.fitness )
@@ -367,7 +367,7 @@ public class NeualNet implements Encephalon<double[],double[]>, Comparable<Neual
             FileInputStream file = new FileInputStream(loc+".annObj");
             ObjectInputStream out = new ObjectInputStream(file);
             // Method for serialization of object
-            NeualNet temp = (NeualNet)out.readObject();
+            NeuralNet temp = (NeuralNet)out.readObject();
             this.firstLayer = temp.firstLayer;
             this.lastLayer = temp.lastLayer;
             this.fitness = temp.fitness;
@@ -468,9 +468,9 @@ public class NeualNet implements Encephalon<double[],double[]>, Comparable<Neual
         else if ( threshold < .4 )
             d  = rand.nextDouble(2.0d) - 1.0d; 
         else if ( threshold < .6 )
-            d /= (1 / rand.nextInt(100));
+            d /= (1 / (rand.nextInt(100)+1));
         else if ( threshold < .8 )
-            d *= (1 / rand.nextInt(100));
+            d *= (1 / (rand.nextInt(100)+1));
         return d;
     }
 
