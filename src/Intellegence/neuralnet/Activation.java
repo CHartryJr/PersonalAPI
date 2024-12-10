@@ -7,7 +7,9 @@ public enum Activation
         @Override
         double apply(double value) 
         {
-            return 1/(1+Math.exp(-value));
+            if (!Double.isFinite(value)) return 0; // Handle NaN or Infinity
+                Math.max(-500, Math.min(500, value)); // Clamp input to prevent overflow
+            return 1 / (1 + Math.exp(-value));
         }
 
         @Override
@@ -22,7 +24,10 @@ public enum Activation
         @Override
         double apply(double value) 
         {
-            return (1-Math.exp(-value))/(1+Math.exp(-value));
+
+            if (!Double.isFinite(value)) 
+                return 0;
+            return Math.tanh(value);
         }
 
         @Override
@@ -38,6 +43,7 @@ public enum Activation
         @Override
         double apply(double value) 
         {
+            if (!Double.isFinite(value)) return 1;
             value = Math.floor(value);
             if(value <= 1) 
                 return 1.0;

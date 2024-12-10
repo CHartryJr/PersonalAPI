@@ -3,7 +3,7 @@ package heatreegames.games;
 import heatreegames.GameFrame;
 import heatreegames.GameMenu;
 import heatreegames.GameScene;
-import heatreegames.controllers.MLAdapter;
+import heatreegames.controllers.MLSnakeAdapter;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -89,6 +89,21 @@ public class SnakeGame extends GameScene
     @Override
     protected void move() 
     {
+
+        if (controller instanceof MLSnakeAdapter) 
+        {
+            MLSnakeAdapter m =(MLSnakeAdapter)controller;
+            m.getEnviroment(getEnviroment());
+            int aiInput = m.getInput();
+            switch (aiInput) 
+            {
+                case KeyEvent.VK_LEFT -> dir = 'L';
+                case KeyEvent.VK_RIGHT -> dir = 'R';
+                case KeyEvent.VK_UP -> dir = 'U';
+                case KeyEvent.VK_DOWN -> dir = 'D';
+            }
+        }
+
         for (int i = body; i > 0; i--) 
         {
             x[i] = x[i - 1];
@@ -133,11 +148,15 @@ public class SnakeGame extends GameScene
     protected void gameOver(Graphics g) 
     {
         
-        if(this.controller instanceof MLAdapter)
+        if(this.controller instanceof MLSnakeAdapter)
         {
             try 
             {
-                Thread.sleep(3000);
+                g.setColor(Color.RED);
+                g.setFont(new Font("Ink Free", Font.BOLD, UNIT_SIZE * 4));
+                FontMetrics metrics = getFontMetrics(g.getFont());
+                g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+                Thread.sleep(2000);
                 timer.stop();
                 startGame();
             } 
@@ -165,7 +184,7 @@ public class SnakeGame extends GameScene
     @Override
     protected void handleKeyPress(int keyCode) 
     {
-      //  System.out.println(String.format("\rYour movement keypad {%d}",keyCode));
+      System.out.println(String.format("\rYour movement keypad {%d}",keyCode));
     
         if (!running) 
         {
@@ -203,18 +222,18 @@ public class SnakeGame extends GameScene
                 {
                     if (dir != 'U') dir = 'D';
                 }
-                // case KeyEvent.VK_P -> 
-                // {
-                //     paused = !paused;
-                //     if (paused) 
-                //     {
-                //         timer.stop();
-                //     } 
-                //     else 
-                //     {
-                //         timer.start();
-                //     }
-                // }
+                case KeyEvent.VK_P -> 
+                {
+                    paused = !paused;
+                    if (paused) 
+                    {
+                        timer.stop();
+                    } 
+                    else 
+                    {
+                        timer.start();
+                    }
+                }
             }
         }
     }
@@ -232,6 +251,10 @@ public class SnakeGame extends GameScene
     @Override
     public double[] getEnviroment() 
     {
-       return new double[]{body,x[0],y[0],appleLocx,appleLocy};
+        return new double[]{body, x[0], y[0], appleLocx, appleLocy, SCREEN_WIDTH, SCREEN_HEIGHT};
+    }
+    public int getApplesEaten()
+    {
+        return applesEaten;
     }
 }

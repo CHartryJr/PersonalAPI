@@ -46,7 +46,7 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
      * @param numberOfInputs
      * @param numberOfHiddenLayers
      * @param numberOfOutPuts
-     * @apiNote maxNumNeuron = 5
+     * 
      */
     public NeuralNet( int numberOfInputs, int numberOfHiddenLayers, int numberOfOutPuts )
     {
@@ -60,7 +60,10 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     {
         this( 1,0,1,1 );
     }
-
+    public double[] getCurrentInput()
+    {
+        return firstLayer.getCurrentInput();
+    }
     /**
      * @return the size
      */
@@ -471,6 +474,8 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
             d /= (1 / (rand.nextInt(100)+1));
         else if ( threshold < .8 )
             d *= (1 / (rand.nextInt(100)+1));
+        if (!Double.isFinite(d)) 
+                return 0;
         return d;
     }
 
