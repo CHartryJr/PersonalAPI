@@ -42,7 +42,7 @@ public class App
         while (epoch < MAX_EPOCHS && successfulMoves < 30) 
         {
             
-           // mlAdapter.swapEncephalon(net);
+           mlAdapter.swapEncephalon(net);
             synchronized (gf.getTreeLock()) 
             {
                 if (!(gf.getGame() instanceof SnakeGame)) 
