@@ -1,4 +1,4 @@
-package intellegence.neuralnet;
+package Intellegence.neuralnet;
 
 public class HiddenLayer extends Layer 
 {

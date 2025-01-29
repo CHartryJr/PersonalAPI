@@ -1,4 +1,4 @@
-package intellegence.neuralnet;
+package Intellegence.neuralnet;
 import java.io.Serializable;
 import java.util.ArrayList;
 /**

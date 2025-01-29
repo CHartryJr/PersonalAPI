@@ -1,8 +1,9 @@
 import heatreegames.GameFrame;
 import heatreegames.controllers.MLSnakeAdapter;
 import heatreegames.games.SnakeGame;
-import intellegence.neuralnet.Activation;
-import intellegence.neuralnet.NeuralNet;
+import Intellegence.neuralnet.Activation;
+import Intellegence.neuralnet.NeuralNet;
+
 import java.awt.event.KeyEvent;
 import javax.swing.SwingUtilities;
 import java.io.File;

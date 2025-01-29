@@ -1,6 +1,6 @@
 package heatreegames.controllers;
 
-import intellegence.Encephalon;
+import Intellegence.Encephalon;
 
 import java.awt.event.KeyAdapter;
 import java.util.Random;

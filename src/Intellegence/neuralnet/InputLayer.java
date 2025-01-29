@@ -1,4 +1,4 @@
-package intellegence.neuralnet;
+package Intellegence.neuralnet;
 
 
 public class InputLayer extends Layer 

@@ -1,4 +1,4 @@
-package intellegence;
+package Intellegence;
 
 /**
  * This function will be used to input data into various modles.

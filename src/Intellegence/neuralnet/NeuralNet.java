@@ -1,7 +1,7 @@
-package intellegence.neuralnet;
+package Intellegence.neuralnet;
 import java.io.*;
 import java.util.Random;
-import intellegence.Encephalon;
+import Intellegence.Encephalon;
 
 /**
  *  @implNote This is a mock of a Artifical Neural Network.
