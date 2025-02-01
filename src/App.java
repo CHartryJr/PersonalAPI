@@ -10,10 +10,10 @@ import java.io.File;
 
 public class App 
 {
-    private static final int MAX_EPOCHS = 1_000_000;
     private static final int SUCCESSFUL_MOVE_THRESHOLD = 30;
     private static final int MUTATION_INTERVAL = 200;
     private static NeuralNet net; 
+    private static boolean eatenApple;
         
 
       public static void main(String[] args)
@@ -30,98 +30,85 @@ public class App
         });
     }
 
-    private static void trainSnakeAI(GameFrame gf,  String workingDir) 
-    {
-        int epoch = 0;
-        int successfulMoves = 0;
-        int applesCollected = 0;
+    private static void trainSnakeAI(GameFrame gf, String workingDir) {
+        int epoch = 0, successfulMoves = 0, applesCollected = 0;
         MLSnakeAdapter mlAdapter = new MLSnakeAdapter();
-        Boolean eatenApple = false;
+        eatenApple = false;
         workingDir += "/assets/BestSnakePlayer";
-     
-        while (epoch < MAX_EPOCHS && successfulMoves < 30) 
-        {
-            
-           mlAdapter.swapEncephalon(net);
-            synchronized (gf.getTreeLock()) 
-            {
-                if (!(gf.getGame() instanceof SnakeGame)) 
-                {
+    
+        while (successfulMoves < SUCCESSFUL_MOVE_THRESHOLD) {
+            mlAdapter.swapEncephalon(net);
+    
+            synchronized (gf.getTreeLock()) {
+                if (!(gf.getGame() instanceof SnakeGame)) {
                     continue; // Wait for SnakeGame to start
                 }
                 SnakeGame game = (SnakeGame) gf.getGame();
-                if( game.gameIsRunning())
-                {
-                    
-                    game.swapController(mlAdapter);
-                    double[] environment = game.getEnviroment();
-                    net.forward();
-                    // Calculate move prediction
-                    int predictedMove = predictMove(environment);
-                    int neuralMove = mlAdapter.getInput();
-
-                    if (neuralMove != predictedMove) 
-                    {
-                        clearConsole();
-                        net.train(0, mapToNet(predictedMove));                                   
-                        if (epoch % MUTATION_INTERVAL == 0 && successfulMoves < SUCCESSFUL_MOVE_THRESHOLD/2 && eatenApple) 
-                        {
-                            mlAdapter.swapEncephalon(net);
-                            net.mutate();
-                        }
-                        System.out.print("\r");
-                        System.out.print(net);
-                        System.out.print("Game Enviroment:  ");
-                        for(double x : environment)
-                        {
-                            System.out.print(x+" ");
-                        }
-                        System.out.print("\n");
-                        System.out.print("Observed :  ");
-                        for(double x : net.getCurrentInput())
-                        {
-                            System.out.print(x+" ");
-                        }
-                    } 
-                    else 
-                    {
-
-                        successfulMoves++;
-                        if (successfulMoves == SUCCESSFUL_MOVE_THRESHOLD) 
-                        {
-                            saveBest(workingDir);
-                            break;
-                        }
-                    }
-                    eatenApple = applesCollected < game.getApplesEaten();
-
-                    // Fitness adjustment
-                    if (eatenApple) 
-                    {
-                        saveBest(workingDir);
-                        applesCollected = game.getApplesEaten();
-                    }
-
-                    if(epoch  % 32 == 0)
-                    {
-                        eatenApple = false;
-                    }
-                    epoch++;
+    
+                if (!game.gameIsRunning()) {
+                    continue; // Ensure game is running
                 }
     
+                game.swapController(mlAdapter);
+                double[] environment = game.getEnviroment();
+                net.forward();
+    
+                int predictedMove = predictMove(environment);
+                int neuralMove = mlAdapter.getInput();
+    
+                if (neuralMove != predictedMove) {
+                    net.train(0, mapToNet(predictedMove));
+    
+                    if (epoch % MUTATION_INTERVAL == 0 && successfulMoves < SUCCESSFUL_MOVE_THRESHOLD / 2 && eatenApple) {
+                        mlAdapter.swapEncephalon(net);
+                        net.mutate();
+                    }
+    
+                    logTrainingProgress(environment);
+                } else {
+                    successfulMoves++;
+                    if (successfulMoves == SUCCESSFUL_MOVE_THRESHOLD) {
+                        saveBest(workingDir);
+                        break;
+                    }
+                }
+    
+                eatenApple = applesCollected < game.getApplesEaten();
+                if (eatenApple) {
+                    saveBest(workingDir);
+                    applesCollected = game.getApplesEaten();
+                }
             }
-
-            try 
-            {
-                Thread.sleep(75); // Adjust as per gameplay speed
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                System.err.println("Training thread interrupted: " + e.getMessage());
-                return;
-            }
-            
+    
+            epoch++;
+            resetEatenAppleFlag(epoch);
+            sleepThread(75);
         }
     }
+    
+    private static void logTrainingProgress(double[] environment) {
+        System.out.print("\rNeural Network: " + net + "\nGame Environment: ");
+        for (double x : environment) System.out.print(x + " ");
+        System.out.println("\nObserved: ");
+        for (double x : net.getCurrentInput()) System.out.print(x + " ");
+        System.out.println();
+    }
+    
+    private static void resetEatenAppleFlag(int epoch) {
+        if (epoch % 32 == 0) {
+            eatenApple = false;
+        }
+    }
+    
+    private static void sleepThread(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("Training thread interrupted: " + e.getMessage());
+        }
+    }
+    
 
     private static int predictMove(double[] env) 
     {
