@@ -7,6 +7,7 @@ import Intellegence.neuralnet.NeuralNet;
 import java.awt.event.KeyEvent;
 import javax.swing.SwingUtilities;
 import java.io.File;
+import java.util.Random;
 
 public class App 
 {
@@ -33,7 +34,7 @@ public class App
     private static void trainSnakeAI(GameFrame gf, String workingDir) {
         int epoch = 0, successfulMoves = 0, applesCollected = 0;
         MLSnakeAdapter mlAdapter = new MLSnakeAdapter();
-        eatenApple = false;
+         eatenApple = false;
         workingDir += "/assets/BestSnakePlayer";
     
         while (successfulMoves < SUCCESSFUL_MOVE_THRESHOLD) {
@@ -54,77 +55,114 @@ public class App
                 net.forward();
     
                 int predictedMove = predictMove(environment);
-                int neuralMove = mlAdapter.getInput();
-    
-                if (neuralMove != predictedMove) {
-                    net.train(0, mapToNet(predictedMove));
-    
-                    if (epoch % MUTATION_INTERVAL == 0 && successfulMoves < SUCCESSFUL_MOVE_THRESHOLD / 2 && eatenApple) {
-                        mlAdapter.swapEncephalon(net);
-                        net.mutate();
+                                int neuralMove = mlAdapter.getInput();
+                    
+                                if (neuralMove != predictedMove) {
+                                    net.train(0, mapToNet(predictedMove));
+                    
+                                    if (epoch % MUTATION_INTERVAL == 0 && successfulMoves < SUCCESSFUL_MOVE_THRESHOLD / 2 && eatenApple) {
+                                        mlAdapter.swapEncephalon(net);
+                                        net.mutate();
+                                    }
+                    
+                                    logTrainingProgress(environment);
+                                } else {
+                                    successfulMoves++;
+                                    if (successfulMoves == SUCCESSFUL_MOVE_THRESHOLD) {
+                                        saveBest(workingDir);
+                                        break;
+                                    }
+                                }
+                    
+                                eatenApple = applesCollected < game.getApplesEaten();
+                                if (eatenApple) {
+                                    saveBest(workingDir);
+                                    applesCollected = game.getApplesEaten();
+                                }
+                            }
+                    
+                            epoch++;
+                            resetEatenAppleFlag(epoch);
+                            sleepThread(75);
+                        }
                     }
-    
-                    logTrainingProgress(environment);
-                } else {
-                    successfulMoves++;
-                    if (successfulMoves == SUCCESSFUL_MOVE_THRESHOLD) {
-                        saveBest(workingDir);
-                        break;
+                    
+                    private static void logTrainingProgress(double[] environment) {
+                        System.out.print("\rNeural Network: " + net + "\nGame Environment: ");
+                        for (double x : environment) System.out.print(x + " ");
+                        System.out.println("\nObserved: ");
+                        for (double x : net.getCurrentInput()) System.out.print(x + " ");
+                        System.out.println();
                     }
-                }
-    
-                eatenApple = applesCollected < game.getApplesEaten();
-                if (eatenApple) {
-                    saveBest(workingDir);
-                    applesCollected = game.getApplesEaten();
-                }
-            }
-    
-            epoch++;
-            resetEatenAppleFlag(epoch);
-            sleepThread(75);
-        }
-    }
-    
-    private static void logTrainingProgress(double[] environment) {
-        System.out.print("\rNeural Network: " + net + "\nGame Environment: ");
-        for (double x : environment) System.out.print(x + " ");
-        System.out.println("\nObserved: ");
-        for (double x : net.getCurrentInput()) System.out.print(x + " ");
-        System.out.println();
-    }
-    
-    private static void resetEatenAppleFlag(int epoch) {
-        if (epoch % 32 == 0) {
-            eatenApple = false;
-        }
-    }
-    
-    private static void sleepThread(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            System.err.println("Training thread interrupted: " + e.getMessage());
-        }
-    }
-    
-
-    private static int predictMove(double[] env) 
+                    
+                    private static void resetEatenAppleFlag(int epoch) {
+                        if (epoch % 32 == 0) {
+                            eatenApple = false;
+                        }
+                    }
+                    
+                    private static void sleepThread(int millis) {
+                        try {
+                            Thread.sleep(millis);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            System.err.println("Training thread interrupted: " + e.getMessage());
+                        }
+                    }
+                    
+                
+                    private static int predictMove(double[]env) 
     {
-        int xDiff = (int) Math.abs(env[1] - env[3]);
-        int yDiff = (int) Math.abs(env[2] - env[4]);
+        final int KEY_CODE_RANGE = 4;
+        Random random = new Random();
+        if (env != null) 
+        {
+           
+                int xDiff = (int)Math.abs(env[1] - env[3]); // Snake head X - Apple X
+                int yDiff = (int)Math.abs(env[2] - env[4]); // Snake head Y - Apple Y
+                int nextMove= -1,opp_mov = 1;
+    
+                if (xDiff == 0) 
+                {
+                    nextMove = (env[2] > env[4]) ?KeyEvent.VK_UP : KeyEvent.VK_DOWN;
+                } 
+                else if (yDiff == 0) 
+                {
+                    nextMove = (env[1] > env[3]) ? KeyEvent.VK_LEFT  : KeyEvent.VK_RIGHT;
+                } 
+                else if (xDiff > yDiff) 
+                {
+                    nextMove = (env[1] > env[3]) ? KeyEvent.VK_LEFT  : KeyEvent.VK_RIGHT;
+                } 
+                else 
+                {
+                    nextMove = (env[2] > env[4]) ? KeyEvent.VK_UP : KeyEvent.VK_DOWN;
+                }
 
-        if (xDiff < yDiff && xDiff != 0) 
-        {
-            return env[1] > env[3] ? KeyEvent.VK_LEFT : KeyEvent.VK_RIGHT;
-        } 
-        else 
-        {
-            return env[2] < env[4] ? KeyEvent.VK_DOWN : KeyEvent.VK_UP;
+                
+                if (nextMove == opp_mov) 
+                {
+                    
+                    nextMove = (xDiff <= yDiff) ? ((env[1] > env[3]) ? KeyEvent.VK_LEFT : KeyEvent.VK_RIGHT)
+                                                : ((env[2] > env[4]) ? KeyEvent.VK_UP :KeyEvent.VK_DOWN);
+                }
+    
+                opp_mov = getOppositeMove(nextMove);
+                return nextMove;
         }
+        return random.nextInt(KEY_CODE_RANGE) +KeyEvent.VK_LEFT ;
     }
+    
 
+    private static int getOppositeMove(int move) {
+        return switch (move) {
+            case KeyEvent.VK_LEFT -> KeyEvent.VK_RIGHT;
+            case KeyEvent.VK_RIGHT -> KeyEvent.VK_LEFT ;
+            case KeyEvent.VK_UP -> KeyEvent.VK_DOWN;
+            case KeyEvent.VK_DOWN ->KeyEvent.VK_UP;
+            default -> -1;
+        };
+    }
     private static void saveNetwork(NeuralNet net, String path) 
     {
         try 
