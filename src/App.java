@@ -5,13 +5,15 @@ import Intellegence.neuralnet.Activation;
 import Intellegence.neuralnet.NeuralNet;
 
 import java.awt.event.KeyEvent;
+
+import javax.management.RuntimeErrorException;
 import javax.swing.SwingUtilities;
 import java.io.File;
 import java.util.Random;
 
 public class App 
 {
-    private static final int SUCCESSFUL_MOVE_THRESHOLD = 30;
+    private static final int SUCCESSFUL_MOVE_THRESHOLD = 1000;
     private static final int MUTATION_INTERVAL = 200;
     private static NeuralNet net; 
     private static boolean eatenApple;
@@ -31,22 +33,29 @@ public class App
         });
     }
 
-    private static void trainSnakeAI(GameFrame gf, String workingDir) {
+    private static void trainSnakeAI(GameFrame gf, String workingDir) 
+    {
         int epoch = 0, successfulMoves = 0, applesCollected = 0;
         MLSnakeAdapter mlAdapter = new MLSnakeAdapter();
          eatenApple = false;
         workingDir += "/assets/BestSnakePlayer";
     
-        while (successfulMoves < SUCCESSFUL_MOVE_THRESHOLD) {
+        while (successfulMoves < SUCCESSFUL_MOVE_THRESHOLD) 
+        {
             mlAdapter.swapEncephalon(net);
     
-            synchronized (gf.getTreeLock()) {
-                if (!(gf.getGame() instanceof SnakeGame)) {
+            synchronized (gf.getTreeLock())
+            {
+                if (!(gf.getGame() instanceof SnakeGame)) 
+                {
                     continue; // Wait for SnakeGame to start
                 }
+
                 SnakeGame game = (SnakeGame) gf.getGame();
     
-                if (!game.gameIsRunning()) {
+                if (!game.gameIsRunning()) 
+                {
+                    successfulMoves = 0;
                     continue; // Ensure game is running
                 }
     
@@ -55,35 +64,42 @@ public class App
                 net.forward();
     
                 int predictedMove = predictMove(environment);
-                                int neuralMove = mlAdapter.getInput();
-                    
-                                if (neuralMove != predictedMove) {
-                                    net.train(0, mapToNet(predictedMove));
-                    
-                                    if (epoch % MUTATION_INTERVAL == 0 && successfulMoves < SUCCESSFUL_MOVE_THRESHOLD / 2 && eatenApple) {
-                                        mlAdapter.swapEncephalon(net);
-                                        net.mutate();
+                int neuralMove = mlAdapter.getInput();
+                            
+                                        if (neuralMove != predictedMove) 
+                                        {
+                                            net.train(0, mapToNet(predictedMove));
+                            
+                                            if (epoch % MUTATION_INTERVAL == 0 && successfulMoves < SUCCESSFUL_MOVE_THRESHOLD / 2 && eatenApple) 
+                                            {
+                                                mlAdapter.swapEncephalon(net);
+                                                net.mutate();
+                                            }
+                            
+                                        // logTrainingProgress(environment);
+                                        } 
+                                        else 
+                                        {
+                                            successfulMoves++;
+                                            System.out.println(String.format("made %d succesful moves", successfulMoves));
+                                            if (successfulMoves == SUCCESSFUL_MOVE_THRESHOLD) 
+                                            {
+                                                saveBest(workingDir);
+                                                break;
+                                            }
+                                        }
+                            
+                                        eatenApple = applesCollected < game.getApplesEaten();
+                                        if (eatenApple) 
+                                        {
+                                            saveBest(workingDir);
+                                            applesCollected = game.getApplesEaten();
+                                        }
                                     }
-                    
-                                    logTrainingProgress(environment);
-                                } else {
-                                    successfulMoves++;
-                                    if (successfulMoves == SUCCESSFUL_MOVE_THRESHOLD) {
-                                        saveBest(workingDir);
-                                        break;
-                                    }
-                                }
-                    
-                                eatenApple = applesCollected < game.getApplesEaten();
-                                if (eatenApple) {
-                                    saveBest(workingDir);
-                                    applesCollected = game.getApplesEaten();
-                                }
-                            }
-                    
-                            epoch++;
-                            resetEatenAppleFlag(epoch);
-                            sleepThread(75);
+                            
+                                    epoch++;
+                                    resetEatenAppleFlag(epoch);
+                                    sleepThread(75);
                         }
                     }
                     
@@ -167,6 +183,8 @@ public class App
     {
         try 
         {
+            if(net == null)
+                throw new Exception("No Network to save");
             net.saveStream(path);
         } 
         catch (Exception e)
@@ -214,11 +232,14 @@ public class App
     private static void saveBest(String workingDir)
     {
         NeuralNet temp = loadNetwork(workingDir);
+        
         if(net.compareTo(temp) >= 0 )
         {
             net.setFitness(net.getFitness() + 1);
             saveNetwork(net, workingDir );
         }
+        System.out.println("new Winner has been saved");
+
     }
 
 }
