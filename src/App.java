@@ -3,26 +3,21 @@ import heatreegames.controllers.MLSnakeAdapter;
 import heatreegames.games.SnakeGame;
 import Intellegence.neuralnet.Activation;
 import Intellegence.neuralnet.NeuralNet;
-
-import java.awt.event.KeyEvent;
-
-import javax.management.RuntimeErrorException;
 import javax.swing.SwingUtilities;
 import java.io.File;
-import java.util.Random;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
 
 public class App 
 {
-    private static final int SUCCESSFUL_MOVE_THRESHOLD = 1000;
-    private static final int MUTATION_INTERVAL = 200;
-    private static NeuralNet net; 
-    private static boolean eatenApple;
-        
 
-      public static void main(String[] args)
-     {
+    public static void main(String[] args)
+    {
         String currentWorkingDirectory = System.getProperty("user.dir");
-        net = loadNetwork(currentWorkingDirectory);
         // Create and start the game frame
         SwingUtilities.invokeLater(() -> 
         {
@@ -33,18 +28,22 @@ public class App
         });
     }
 
-    private static void trainSnakeAI(GameFrame gf, String workingDir) 
+    private static void trainSnakeAI(GameFrame gf, String cwd) 
     {
-        int epoch = 0, successfulMoves = 0, applesCollected = 0;
+        Boolean newRecord = false,newGame = false;
+        final int MUTATION_INTERVAL = 20, SUCCESSFUL_MOVE_THRESHOLD = 10;
+        int epoch = 0, applesCollectedInGame = 0, totalApplesCollected = 0, hightScore = 0,prevScore = 0;
         MLSnakeAdapter mlAdapter = new MLSnakeAdapter();
-         eatenApple = false;
-        workingDir += "/assets/BestSnakePlayer";
-    
-        while (successfulMoves < SUCCESSFUL_MOVE_THRESHOLD) 
+        final String locToNet ="/assets/Snake/BestSnakePlayer";
+        String netDir = cwd + locToNet, savedScore = cwd + "/assets/Snake/BestSCore.txt";
+        NeuralNet net = loadNetwork(netDir);
+        hightScore = loadScore(savedScore);
+            
+        while (applesCollectedInGame < SUCCESSFUL_MOVE_THRESHOLD) 
         {
             mlAdapter.swapEncephalon(net);
-    
-            synchronized (gf.getTreeLock())
+
+            synchronized (gf.getTreeLock()) 
             {
                 if (!(gf.getGame() instanceof SnakeGame)) 
                 {
@@ -52,133 +51,89 @@ public class App
                 }
 
                 SnakeGame game = (SnakeGame) gf.getGame();
-    
+
                 if (!game.gameIsRunning()) 
                 {
-                    successfulMoves = 0;
-                    continue; // Ensure game is running
-                }
-    
-                game.swapController(mlAdapter);
-                double[] environment = game.getEnviroment();
-                net.forward();
-    
-                int predictedMove = predictMove(environment);
-                int neuralMove = mlAdapter.getInput();
-                            
-                                        if (neuralMove != predictedMove) 
-                                        {
-                                            net.train(0, mapToNet(predictedMove));
-                            
-                                            if (epoch % MUTATION_INTERVAL == 0 && successfulMoves < SUCCESSFUL_MOVE_THRESHOLD / 2 && eatenApple) 
-                                            {
-                                                mlAdapter.swapEncephalon(net);
-                                                net.mutate();
-                                            }
-                            
-                                        // logTrainingProgress(environment);
-                                        } 
-                                        else 
-                                        {
-                                            successfulMoves++;
-                                            System.out.println(String.format("made %d succesful moves", successfulMoves));
-                                            if (successfulMoves == SUCCESSFUL_MOVE_THRESHOLD) 
-                                            {
-                                                saveBest(workingDir);
-                                                break;
-                                            }
-                                        }
-                            
-                                        eatenApple = applesCollected < game.getApplesEaten();
-                                        if (eatenApple) 
-                                        {
-                                            saveBest(workingDir);
-                                            applesCollected = game.getApplesEaten();
-                                        }
-                                    }
-                            
-                                    epoch++;
-                                    resetEatenAppleFlag(epoch);
-                                    sleepThread(75);
+                    if(!newGame)
+                    {
+                        if((applesCollectedInGame > hightScore) || (applesCollectedInGame > prevScore) )
+                        {
+                            net.setFitness(net.getFitness() +1);
+                            saveBest(netDir,net);
                         }
-                    }
-                    
-                    private static void logTrainingProgress(double[] environment) {
-                        System.out.print("\rNeural Network: " + net + "\nGame Environment: ");
-                        for (double x : environment) System.out.print(x + " ");
-                        System.out.println("\nObserved: ");
-                        for (double x : net.getCurrentInput()) System.out.print(x + " ");
-                        System.out.println();
-                    }
-                    
-                    private static void resetEatenAppleFlag(int epoch) {
-                        if (epoch % 32 == 0) {
-                            eatenApple = false;
-                        }
-                    }
-                    
-                    private static void sleepThread(int millis) {
-                        try {
-                            Thread.sleep(millis);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            System.err.println("Training thread interrupted: " + e.getMessage());
-                        }
-                    }
-                    
-                
-                    private static int predictMove(double[]env) 
-    {
-        final int KEY_CODE_RANGE = 4;
-        Random random = new Random();
-        if (env != null) 
-        {
-           
-                int xDiff = (int)Math.abs(env[1] - env[3]); // Snake head X - Apple X
-                int yDiff = (int)Math.abs(env[2] - env[4]); // Snake head Y - Apple Y
-                int nextMove= -1,opp_mov = 1;
-    
-                if (xDiff == 0) 
-                {
-                    nextMove = (env[2] > env[4]) ?KeyEvent.VK_UP : KeyEvent.VK_DOWN;
-                } 
-                else if (yDiff == 0) 
-                {
-                    nextMove = (env[1] > env[3]) ? KeyEvent.VK_LEFT  : KeyEvent.VK_RIGHT;
-                } 
-                else if (xDiff > yDiff) 
-                {
-                    nextMove = (env[1] > env[3]) ? KeyEvent.VK_LEFT  : KeyEvent.VK_RIGHT;
-                } 
-                else 
-                {
-                    nextMove = (env[2] > env[4]) ? KeyEvent.VK_UP : KeyEvent.VK_DOWN;
-                }
+                        else
+                            net.setFitness(net.getFitness() -1);
 
-                
-                if (nextMove == opp_mov) 
-                {
-                    
-                    nextMove = (xDiff <= yDiff) ? ((env[1] > env[3]) ? KeyEvent.VK_LEFT : KeyEvent.VK_RIGHT)
-                                                : ((env[2] > env[4]) ? KeyEvent.VK_UP :KeyEvent.VK_DOWN);
+                        prevScore = applesCollectedInGame  > prevScore ? applesCollectedInGame  : prevScore;
+                        applesCollectedInGame = 0;
+                        newRecord = false;
+                    }
+                    newGame = false;
+                    continue; 
                 }
-    
-                opp_mov = getOppositeMove(nextMove);
-                return nextMove;
+                else
+                {
+                    game.swapController(mlAdapter);
+                    net.forward();
+
+                    if( epoch % MUTATION_INTERVAL == 1)
+                        net.mutate();
+
+                    newRecord =  applesCollectedInGame > totalApplesCollected;
+                    if (newRecord) 
+                    {
+                        net.setFitness(net.getFitness() + 10);
+                        saveScore(savedScore,applesCollectedInGame);
+                        totalApplesCollected = game.getApplesEaten();
+                    }
+                
+                    newGame = true;
+                    ++epoch;
+                }
+            }
+            sleepThread(75);
         }
-        return random.nextInt(KEY_CODE_RANGE) +KeyEvent.VK_LEFT ;
+    }
+
+  
+    private static int loadScore(String filePath) {
+        Path path = Paths.get(filePath);
+        try {
+            if (!Files.exists(path)) {
+                Files.writeString(path, "0", StandardOpenOption.CREATE);
+                return 0;
+            }
+            return Integer.parseInt(Files.readString(path).trim());
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error loading score: " + e.getMessage());
+            return 0;
+        }
     }
     
 
-    private static int getOppositeMove(int move) {
-        return switch (move) {
-            case KeyEvent.VK_LEFT -> KeyEvent.VK_RIGHT;
-            case KeyEvent.VK_RIGHT -> KeyEvent.VK_LEFT ;
-            case KeyEvent.VK_UP -> KeyEvent.VK_DOWN;
-            case KeyEvent.VK_DOWN ->KeyEvent.VK_UP;
-            default -> -1;
-        };
+    private static void saveScore(String filePath, int score) {
+        try {
+            Files.writeString(Paths.get(filePath), String.valueOf(score),
+                              StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException e) {
+            System.err.println("Error saving score: " + e.getMessage());
+        }
     }
+    
+                    
+    private static void sleepThread(int millis) 
+    {
+        try 
+        {
+            Thread.sleep(millis);
+        }
+            catch (InterruptedException e) 
+        {
+            Thread.currentThread().interrupt();
+            System.err.println("Training thread interrupted: " + e.getMessage());
+        }
+    }
+                        
     private static void saveNetwork(NeuralNet net, String path) 
     {
         try 
@@ -215,31 +170,28 @@ public class App
         return nn;
     }
 
-    static private double[] mapToNet(int index)
-    {
-        double [] mappedVectors = index == 37 ? new double[]{1,0,0,0}: index == 38 ?  new double[] {0,1,0,0} : index == 39 ? new double[] {0,0,1,0} : new double[] {0,0,0,1} ;// L , U, R ,D
-        return mappedVectors ; 
-    }
-
     public static void clearConsole() {
         try {
-            new ProcessBuilder("clear").inheritIO().start().waitFor();
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("win")) {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+            } else {
+                new ProcessBuilder("clear").inheritIO().start().waitFor();
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error clearing console: " + e.getMessage());
         }
     }
+    
 
-    private static void saveBest(String workingDir)
-    {
+    private static void saveBest(String workingDir, NeuralNet net) {
         NeuralNet temp = loadNetwork(workingDir);
-        
-        if(net.compareTo(temp) >= 0 )
-        {
+        if (net.compareTo(temp) >= 0) {
             net.setFitness(net.getFitness() + 1);
-            saveNetwork(net, workingDir );
+            saveNetwork(net, workingDir);
+            System.out.println("\nNew best network saved.");
         }
-        System.out.println("new Winner has been saved");
-
     }
+    
 
 }

@@ -362,6 +362,7 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
             return false;
         }
     }
+    
     public boolean loadStream(String loc)
     {
          try
@@ -413,8 +414,15 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         }
     }
 
+    /**
+     * Fuction to update weights using deriavtive and layers to expected output connections.
+     * @param expected
+     */
     private void backPropogate( double [] expected )
     {
+        if(expected.length != lastLayer.neurons.size())
+            throw new IndexOutOfBoundsException("expected size dose not match output size");
+
         Layer currentLayer = lastLayer;
 
         while(currentLayer != null )

@@ -116,7 +116,7 @@ public class SnakeGame extends GameScene
             case 'U' -> y[0] -= UNIT_SIZE;
             case 'D' -> y[0] += UNIT_SIZE;
         }
-        //System.out.println(String.format("Your movement {%d , %d} The apple loc {%d , %d}", x[0],y[0],appleLocx,appleLocy));
+        System.out.print(String.format("  movement {%d , %d} The apple loc {%d , %d}", x[0],y[0],appleLocx,appleLocy));
     }
 
     @Override
@@ -155,7 +155,7 @@ public class SnakeGame extends GameScene
                 g.setFont(new Font("Ink Free", Font.BOLD, UNIT_SIZE * 4));
                 FontMetrics metrics = getFontMetrics(g.getFont());
                 g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
-                Thread.sleep(2000);
+               Thread.sleep(2000);
                 timer.stop();
                 startGame();
             } 

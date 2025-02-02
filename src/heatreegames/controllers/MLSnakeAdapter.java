@@ -8,12 +8,8 @@ public class MLSnakeAdapter extends KeyAdapter
 {
     private Encephalon<double[], double[]> encephalon;
     private final Random random;
-    private  final int KEY_LEFT = 37;
-    private  final int KEY_UP = 38;
-    private  final int KEY_RIGHT = 39;
-    private  final int KEY_DOWN = 40;
     private  final int KEY_CODE_RANGE = 4;
-    private int opp_mov = 1;
+    private int nextMove = 1;
     private  double [] env;
 
     // Constructor with encephalon
@@ -58,61 +54,27 @@ public class MLSnakeAdapter extends KeyAdapter
     // enviroment data {body, x[0], y[0], appleLocx, appleLocy, SCREEN_WIDTH, SCREEN_HEIGHT};
     private int predictMove() 
     {
+        nextMove = random.nextInt(KEY_CODE_RANGE) + 37;
+        String output = "";
         if (env != null) 
         {
             if (encephalon != null) 
             {
                 encephalon.observe(env);
-                return 37 + argMax(encephalon.predict());
-            } 
-            else 
-            {
-                int xDiff = (int)Math.abs(env[1] - env[3]); // Snake head X - Apple X
-                int yDiff = (int)Math.abs(env[2] - env[4]); // Snake head Y - Apple Y
-                int nextMove = -1;
-    
-                if (xDiff == 0) 
-                {
-                    nextMove = (env[2] > env[4]) ? KEY_UP : KEY_DOWN;
-                } 
-                else if (yDiff == 0) 
-                {
-                    nextMove = (env[1] > env[3]) ? KEY_LEFT : KEY_RIGHT;
-                } 
-                else if (xDiff > yDiff) 
-                {
-                    nextMove = (env[1] > env[3]) ? KEY_LEFT : KEY_RIGHT;
-                } 
-                else 
-                {
-                    nextMove = (env[2] > env[4]) ? KEY_UP : KEY_DOWN;
-                }
-
-                
-                if (nextMove == opp_mov) 
-                {
-                    
-                    nextMove = (xDiff <= yDiff) ? ((env[1] > env[3]) ? KEY_LEFT : KEY_RIGHT)
-                                                : ((env[2] > env[4]) ? KEY_UP : KEY_DOWN);
-                }
-    
-                opp_mov = getOppositeMove(nextMove);
+                nextMove = 37 + argMax(encephalon.predict());
+                output = nextMove == 37 ? "Left": 
+                nextMove == 38 ? "Up": 
+                nextMove == 39 ? "Right": 
+                nextMove == 40 ? "Down": "Unknown move "+ nextMove;
+                System.out.print("\r Agent moved "+output);
                 return nextMove;
             }
+
+            return nextMove;
         }
-        return random.nextInt(KEY_CODE_RANGE) + KEY_LEFT;
+        return nextMove;
     }
     
-
-    private int getOppositeMove(int move) {
-        return switch (move) {
-            case KEY_LEFT -> KEY_RIGHT;
-            case KEY_RIGHT -> KEY_LEFT;
-            case KEY_UP -> KEY_DOWN;
-            case KEY_DOWN -> KEY_UP;
-            default -> -1;
-        };
-    }
     
     public void setEnviroment(double[] enviroment) 
     {
@@ -123,6 +85,4 @@ public class MLSnakeAdapter extends KeyAdapter
     {
        return env;
     }
-    
-   
 }
