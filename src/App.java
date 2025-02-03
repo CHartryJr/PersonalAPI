@@ -10,13 +10,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalTime;
 
 
 public class App 
 {
-
+    public static LocalTime startTime;
     public static void main(String[] args)
     {
+        startTime = LocalTime.now();
         String currentWorkingDirectory = System.getProperty("user.dir");
         // Create and start the game frame
         SwingUtilities.invokeLater(() -> 
@@ -36,11 +38,15 @@ public class App
         MLSnakeAdapter mlAdapter = new MLSnakeAdapter();
         final String locToNet ="/assets/Snake/BestSnakePlayer";
         String netDir = cwd + locToNet, savedScore = cwd + "/assets/Snake/BestSc ore.txt";
-        NeuralNet net = loadNetwork(netDir);
+        NeuralNet net = null;
         hightScore = loadScore(savedScore);
+        LocalTime runTime;
             
         while (applesCollectedInGame < SUCCESSFUL_MOVE_THRESHOLD) 
         {
+            runTime = LocalTime.now();
+            if(Math.abs(runTime.getHour() - startTime.getHour()) % 2 == 0)
+                net = loadNetwork(netDir);
             mlAdapter.swapEncephalon(net);
 
             synchronized (gf.getTreeLock()) 
