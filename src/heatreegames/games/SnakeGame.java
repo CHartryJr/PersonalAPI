@@ -3,7 +3,7 @@ package heatreegames.games;
 import heatreegames.GameFrame;
 import heatreegames.GameMenu;
 import heatreegames.GameScene;
-import heatreegames.controllers.MLSnakeAdapter;
+import heatreegames.controllers.ExternalInputAdapter;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Random;
@@ -89,11 +89,11 @@ public class SnakeGame extends GameScene
     protected void move() 
     {
 
-        if (controller instanceof MLSnakeAdapter) 
+        if (controller instanceof ExternalInputAdapter) 
         {
-            MLSnakeAdapter m =(MLSnakeAdapter)controller;
+            ExternalInputAdapter m =(ExternalInputAdapter)controller;
             m.setEnviroment(getEnviroment());
-            int aiInput = m.getInput();
+            int aiInput = m.getNextMove();
             switch (aiInput) 
             {
                 case KeyEvent.VK_LEFT -> dir = 'L';
@@ -116,7 +116,7 @@ public class SnakeGame extends GameScene
             case 'U' -> y[0] -= UNIT_SIZE;
             case 'D' -> y[0] += UNIT_SIZE;
         }
-        System.out.print(String.format(" movement {%d , %d} The apple loc {%d , %d}", x[0],y[0],appleLocx,appleLocy));
+        System.out.print(String.format(" Movement {%d , %d} The Apple Loc {%d , %d} |SG|", x[0],y[0],appleLocx,appleLocy));
     }
 
     @Override
@@ -147,7 +147,7 @@ public class SnakeGame extends GameScene
     protected void gameOver(Graphics g) 
     {
         
-        if(this.controller instanceof MLSnakeAdapter)
+        if(this.controller instanceof ExternalInputAdapter)
         {
             try 
             {

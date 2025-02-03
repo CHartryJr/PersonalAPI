@@ -175,6 +175,8 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     @Override
     public void observe(double[]parsept) 
     {
+        if( parsept == null)
+            throw new RuntimeException("no input to observe");
         firstLayer.setInputRep(parsept);
     }
 
@@ -315,6 +317,9 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     @Override
     public int compareTo(NeuralNet o) 
     {
+        if(o == null)
+            return 1;
+
         int flag = 0;
         if( this.fitness < o.fitness )
         {
