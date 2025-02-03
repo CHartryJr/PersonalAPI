@@ -35,7 +35,7 @@ public class App
         int epoch = 0, applesCollectedInGame = 0, totalApplesCollected = 0, hightScore = 0,prevScore = 0;
         MLSnakeAdapter mlAdapter = new MLSnakeAdapter();
         final String locToNet ="/assets/Snake/BestSnakePlayer";
-        String netDir = cwd + locToNet, savedScore = cwd + "/assets/Snake/BestSCore.txt";
+        String netDir = cwd + locToNet, savedScore = cwd + "/assets/Snake/BestSc ore.txt";
         NeuralNet net = loadNetwork(netDir);
         hightScore = loadScore(savedScore);
             
@@ -67,6 +67,7 @@ public class App
                         prevScore = applesCollectedInGame  > prevScore ? applesCollectedInGame  : prevScore;
                         applesCollectedInGame = 0;
                         newRecord = false;
+                        net = loadNetwork(netDir);
                     }
                     newGame = false;
                     continue; 
@@ -76,7 +77,12 @@ public class App
                     game.swapController(mlAdapter);
                     net.forward();
 
-                    if( epoch % MUTATION_INTERVAL == 1)
+                    if(mlAdapter.isTracking())
+                        net.setFitness(net.getFitness() + 1);
+                    else
+                        net.setFitness(net.getFitness() - 1);
+
+                    if( (epoch % MUTATION_INTERVAL == 1) )
                         net.mutate();
 
                     newRecord =  applesCollectedInGame > totalApplesCollected;
@@ -84,6 +90,7 @@ public class App
                     {
                         net.setFitness(net.getFitness() + 10);
                         saveScore(savedScore,applesCollectedInGame);
+                        saveBest(netDir,net);
                         totalApplesCollected = game.getApplesEaten();
                     }
                 
@@ -99,7 +106,8 @@ public class App
     private static int loadScore(String filePath) {
         Path path = Paths.get(filePath);
         try {
-            if (!Files.exists(path)) {
+            if (Files.notExists(path)) {
+                Files.createDirectories(path.getParent()); // Ensure parent directory exists
                 Files.writeString(path, "0", StandardOpenOption.CREATE);
                 return 0;
             }
@@ -110,10 +118,11 @@ public class App
         }
     }
     
-
     private static void saveScore(String filePath, int score) {
         try {
-            Files.writeString(Paths.get(filePath), String.valueOf(score),
+            Path path = Paths.get(filePath);
+            Files.createDirectories(path.getParent()); // Ensure parent directory exists
+            Files.writeString(path, String.valueOf(score),
                               StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             System.err.println("Error saving score: " + e.getMessage());
@@ -183,15 +192,13 @@ public class App
         }
     }
     
-
-    private static void saveBest(String workingDir, NeuralNet net) {
+    private static void saveBest(String workingDir, NeuralNet net) 
+    {
         NeuralNet temp = loadNetwork(workingDir);
         if (net.compareTo(temp) >= 0) {
-            net.setFitness(net.getFitness() + 1);
             saveNetwork(net, workingDir);
             System.out.println("\nNew best network saved.");
         }
     }
     
-
 }
