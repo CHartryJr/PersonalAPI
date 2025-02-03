@@ -116,7 +116,7 @@ public class SnakeGame extends GameScene
             case 'U' -> y[0] -= UNIT_SIZE;
             case 'D' -> y[0] += UNIT_SIZE;
         }
-        //System.out.print(String.format(" Movement {%d , %d} The Apple Loc {%d , %d} |SG|", x[0],y[0],appleLocx,appleLocy));
+        //System.out.print(String.format(" Movement {%d , %d} The Apple Loc {%d , %d} ", x[0],y[0],appleLocx,appleLocy));
     }
 
     @Override
