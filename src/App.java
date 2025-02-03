@@ -68,7 +68,7 @@ public class App
                     if(!newGame)
                     {
                         newRecord =  applesCollectedInGame > hightScore;
-                        if( !newRecord  || (applesCollectedInGame > prevScore) )
+                        if( newRecord == true  || (applesCollectedInGame > prevScore) )
                         {
                             if (newRecord) 
                             {
@@ -80,7 +80,7 @@ public class App
                             prevScore = applesCollectedInGame;
                             net.setFitness(net.getFitness() + curFitness);
                             saveBest(netDir,net);
-                            //System.out.println("made it");
+        
                         }
                         else
                             net.setFitness(net.getFitness() -1);

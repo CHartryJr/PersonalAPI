@@ -65,14 +65,14 @@ public class ExternalInputAdapter extends KeyAdapter
         if(prediction != null)
         if (env != null) 
         {
-            String output = "";
+            //String output = "";
             isTracking = isCloser();
             nextMove = 37 + argMax(prediction);
-                        output = nextMove == 37 ? "Left": 
-                        nextMove == 38 ? "Up": 
-                        nextMove == 39 ? "Right": 
-                        nextMove == 40 ? "Down": "Unknown move "+ nextMove;
-                        System.out.print(" Agent moved "+output+"|EIA| ");
+                        // output = nextMove == 37 ? "Left": 
+                        // nextMove == 38 ? "Up": 
+                        // nextMove == 39 ? "Right": 
+                        // nextMove == 40 ? "Down": "Unknown move "+ nextMove;
+                        // System.out.print(" Agent moved "+output+"|EIA| ");
                   
             prevMov[0] = env[1];
             prevMov[1] = env[3];
