@@ -60,6 +60,7 @@ public class App
                         {
                             net.setFitness(net.getFitness() +1);
                             saveBest(netDir,net);
+                            //System.out.println("made it");
                         }
                         else
                             net.setFitness(net.getFitness() -1);
@@ -67,7 +68,6 @@ public class App
                         prevScore = applesCollectedInGame  > prevScore ? applesCollectedInGame  : prevScore;
                         applesCollectedInGame = 0;
                         newRecord = false;
-                        net = loadNetwork(netDir);
                     }
                     newGame = false;
                     continue; 
@@ -102,7 +102,6 @@ public class App
         }
     }
 
-  
     private static int loadScore(String filePath) {
         Path path = Paths.get(filePath);
         try {
@@ -195,9 +194,9 @@ public class App
     private static void saveBest(String workingDir, NeuralNet net) 
     {
         NeuralNet temp = loadNetwork(workingDir);
-        if (net.compareTo(temp) >= 0) {
+        if (net.compareTo(temp) > 0) {
             saveNetwork(net, workingDir);
-            System.out.println("\nNew best network saved.");
+            System.out.println("\nN ew best network saved.");
         }
     }
     

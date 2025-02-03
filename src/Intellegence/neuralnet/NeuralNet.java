@@ -367,10 +367,9 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     {
          try
         {   
-            //Saving of object in a file
+            
             FileInputStream file = new FileInputStream(loc+".annObj");
             ObjectInputStream out = new ObjectInputStream(file);
-            // Method for serialization of object
             NeuralNet temp = (NeuralNet)out.readObject();
             this.firstLayer = temp.firstLayer;
             this.lastLayer = temp.lastLayer;
@@ -387,7 +386,7 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println(e + "Net failed to,load");
             return false;
         }
     }
