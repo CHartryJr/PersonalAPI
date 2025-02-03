@@ -120,7 +120,7 @@ public class App {
                     neuralNet.forward();
                     aiController.getExternalPrediction(neuralNet.predict());
                     currentFitness += aiController.isTracking() ? 1 : -1;
-                    if((gameState[1] == gameState[5]-50 || gameState[2] == gameState[6]-50)  || (gameState[1] == -25 || gameState[2] == -25))
+                    if((gameState[1] == (gameState[5] - 25) || gameState[2] == (gameState[6]  - 25)  || (gameState[1] == -25 || gameState[2] == -25)))
                         currentFitness -= 30;
                     applesCollected = game.getApplesEaten();
                     System.out.printf("\r Current Fitness: %d | Apples Eaten: %d  ", currentFitness, applesCollected);
