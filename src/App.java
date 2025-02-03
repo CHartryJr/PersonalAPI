@@ -45,7 +45,7 @@ public class App
         while (applesCollectedInGame < SUCCESSFUL_MOVE_THRESHOLD) 
         {
             runTime = LocalTime.now();
-            if(Math.abs(runTime.getHour() - startTime.getHour()) % 2 == 0)
+            if(Math.abs(runTime.getSecond() - startTime.getSecond()) % 3600 == 0)
                 net = loadNetwork(netDir);
             mlAdapter.swapEncephalon(net);
 
