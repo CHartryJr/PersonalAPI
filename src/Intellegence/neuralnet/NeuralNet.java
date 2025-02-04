@@ -31,7 +31,7 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
             throw new IndexOutOfBoundsException("Invalid Number of Nuerons");
         MAX_NUMBER_NEURONS = maxNumOfNuerons;
         size = 0;
-        fitness = Double.MIN_VALUE/2;
+        fitness = 0;
         MSE =  0.0d;
         learningRate =  1E-3;
         this.numberOfHiddenLayers = numberOfHiddenLayers;

@@ -97,8 +97,6 @@ public class App
                             currentFitness -=  2;
                             neuralNet.setFitness(neuralNet.getFitness() + currentFitness); 
                             adaptiveMutation(neuralNet);
-
-                           
                         }
 
                         applesCollected = 0;
@@ -129,7 +127,7 @@ public class App
                         currentFitness -= FITNESS_INCREMENT;
                     applesCollected = game.getApplesEaten();
                    // printNetworkUpdate(neuralNet);
-                    System.out.printf("\rCurrent Fitness: %d | Apples Eaten: %d| Tracking : %b| (x,y) = (%d,%d) ", currentFitness, applesCollected,isTracking,(int)gameState[1],(int)gameState[2]);
+                    System.out.printf("\rIn Game Fitness: %d | Apples Eaten: %d| Tracking : %b| (x,y) = (%d,%d) ", currentFitness, applesCollected,isTracking,(int)gameState[1],(int)gameState[2]);
                     isNewGame = true;    
                 }
             }
