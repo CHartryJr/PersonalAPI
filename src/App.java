@@ -82,7 +82,7 @@ public class App {
                                 System.out.println("New High Score! Apples: " + applesCollected);
                             }
 
-                            previousScore = applesCollected;
+                            previousScore = applesCollected > previousScore ? applesCollected:previousScore;
                             neuralNet.setFitness(neuralNet.getFitness() + currentFitness);
                             saveBest(networkPath, neuralNet);
                         } 
