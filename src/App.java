@@ -10,14 +10,15 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalTime;
 
-public class App {
+public class App 
+{
     private static final String ASSET_DIR = "/assets/Snake/";
     private static final String BEST_NETWORK_FILE = "BestSnakePlayer";
     private static final String BEST_SCORE_FILE = "BestScore.txt";
     private static final int MUTATION_INTERVAL = 30;
     private static final int SUCCESSFUL_MOVE_THRESHOLD = 10;
     private static final int THREAD_SLEEP_DURATION = 75;
-    private static final int FITNESS_INCREMENT = 30;
+    private static final int FITNESS_INCREMENT = 20;
 
     public static void main(String[] args) 
     {
@@ -33,11 +34,16 @@ public class App {
         });
     }
 
+    public static void printNetworkUpdate(NeuralNet net)
+    {
+        System.out.print("\r");
+        System.out.print(" "+ net);
+    }
+
     private static void trainSnakeAI(GameFrame gameFrame, String workingDirectory) 
     {
         boolean isNewRecord = false, isNewGame = false, isCleared = false;
         int  applesCollected = 0, highScore, previousScore = 0, currentFitness = 0;
-        Random random;
         ExternalInputAdapter aiController = new ExternalInputAdapter();
         String networkPath = workingDirectory + ASSET_DIR + BEST_NETWORK_FILE;
         String scorePath = workingDirectory + ASSET_DIR + BEST_SCORE_FILE;
@@ -68,7 +74,7 @@ public class App {
 
                 if (!game.gameIsRunning()) 
                 {
-                    if (!isNewGame) 
+                    if (!isNewGame) //evalute play at end of game
                     {
                         isNewRecord = applesCollected > highScore;
 
@@ -79,7 +85,7 @@ public class App {
                                 currentFitness += FITNESS_INCREMENT;
                                 saveScore(scorePath, applesCollected);
                                 saveBest(networkPath, neuralNet);
-                                System.out.println("New High Score! Apples: " + applesCollected);
+                                System.out.println(String.format("New High Score! Apples: %d with Fitness %d" , applesCollected,(int)neuralNet.getFitness()));
                             }
 
                             previousScore = applesCollected > previousScore ? applesCollected:previousScore;
@@ -88,14 +94,12 @@ public class App {
                         } 
                         else 
                         {
-                            neuralNet.setFitness(neuralNet.getFitness() - 1);
+                            currentFitness -=  2;
+                            neuralNet.setFitness(neuralNet.getFitness() + currentFitness);
                             random = new Random();
-                            for(int i = 0; i < MUTATION_INTERVAL;++i)
-                            {
-                                if(random.nextDouble() > .8d)
-                                    neuralNet.mutate();
-                                neuralNet.mutate();
-                            }
+                            adaptiveMutation(neuralNet);
+
+                           
                         }
 
                         applesCollected = 0;
@@ -113,25 +117,40 @@ public class App {
 
                 game.swapController(aiController);
                 double[] gameState = aiController.getEnviroment();
-
+                
                 if (gameState != null) 
                 {
+                    boolean isBound  = isBound(gameState),isTracking = aiController.isTracking();
                     neuralNet.observe(gameState);
                     neuralNet.forward();
                     aiController.getExternalPrediction(neuralNet.predict());
-                    currentFitness += aiController.isTracking() ? 1 : -1;
-                    if((gameState[1] == (gameState[5] - 25) || gameState[2] == (gameState[6]  - 25)  || (gameState[1] == -25 || gameState[2] == -25)))
-                        currentFitness -= 30;
+                    currentFitness += isTracking ? 2 : -3;
+                    
+                    if(isBound )// if out of bounds
+                        currentFitness -= FITNESS_INCREMENT;
                     applesCollected = game.getApplesEaten();
-                    System.out.printf("\r Current Fitness: %d | Apples Eaten: %d  ", currentFitness, applesCollected);
-                    isNewGame = true;
-                  
+                   // printNetworkUpdate(neuralNet);
+                    System.out.printf("\rCurrent Fitness: %d | Apples Eaten: %d| Tracking : %b| (x,y) = (%d,%d) ", currentFitness, applesCollected,isTracking,(int)gameState[1],(int)gameState[2]);
+                    isNewGame = true;    
                 }
             }
             sleepThread(THREAD_SLEEP_DURATION);
         }
     }
-
+                    
+    private static boolean isBound(double[] gameState) 
+    {
+        double x = gameState[1]; // Snake's X position
+        double y = gameState[2]; // Snake's Y position
+        double gameWidth = gameState[5]-25;//game width
+        double gameHeight = gameState[6]-25;//game height
+        double snakeSize = 25; // Assuming each movement step is 25 pixels
+    
+        return (x < 0 || x + snakeSize >= gameWidth || 
+                y < 0 || y + snakeSize >= gameHeight);
+    }
+    
+                
     private static int loadScore(String filePath) 
     {
         Path path = Paths.get(filePath);
@@ -196,7 +215,6 @@ public class App {
     }
 
     private static NeuralNet loadNetwork(String path) 
-    
     {
         NeuralNet neuralNet = new NeuralNet(7, 1, 4);
         neuralNet.setActivation(Activation.SIGMOID);
@@ -207,7 +225,9 @@ public class App {
             try 
             {
                 neuralNet.loadStream(path);
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
                 System.err.println("Failed to load neural network from " + path + ": " + e.getMessage());
             }
         }
@@ -235,9 +255,26 @@ public class App {
     private static void saveBest(String networkPath, NeuralNet net) 
     {
         NeuralNet bestNet = loadNetwork(networkPath);
-        if (net.compareTo(bestNet) > 0) {
+        if (net.compareTo(bestNet) > 0) 
+        {
             saveNetwork(net, networkPath);
             System.out.println("\nNew best network saved.");
         }
     }
+
+    private static void adaptiveMutation(NeuralNet neuralNet) 
+    {
+        Random random = new Random();
+        double mutationRate = (neuralNet.getFitness() < 0) ? 0.8 : 0.2; // More mutation when fitness drops
+    
+        for (int i = 0; i < MUTATION_INTERVAL; ++i) 
+        {
+            if (random.nextDouble() < mutationRate) 
+            {
+                neuralNet.mutate();
+            }
+        }
+    }
+    
+
 }

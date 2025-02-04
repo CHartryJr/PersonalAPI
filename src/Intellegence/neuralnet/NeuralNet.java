@@ -84,10 +84,12 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         {
             for(Neuron n : cuLayer.neurons)
             {
-                for(double d: n.getWeights())
+                double [] newWeights = new double[n.getWeights().length];
+                for(int j = 0; j < n.getWeights().length;++j)
                 {
-                    d = transform(d);
+                    newWeights[j] = transform(n.getWeights()[j]);
                 }
+                n.setWeightsIn(newWeights);
                 n.setBias(transform(n.getBias()));
             }
             cuLayer = cuLayer.next;
@@ -475,21 +477,43 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         lastLayer.init();
     }
 
-    private  double transform(double d )
+    private double transform(double d) 
     {
         double threshold = rand.nextDouble();
-        if( threshold < .2 )
-            d = -d;
-        else if ( threshold < .4 )
-            d  = rand.nextDouble(2.0d) - 1.0d; 
-        else if ( threshold < .6 )
-            d /= (1 / (rand.nextInt(100)+1));
-        else if ( threshold < .8 )
-            d *= (1 / (rand.nextInt(100)+1));
-        if (!Double.isFinite(d)) 
-                return 0;
+    
+        if (threshold < 0.1) 
+        {
+            d = -d; // Flip sign (exploration)
+        } 
+        else if (threshold < 0.2) 
+        {
+            d += rand.nextGaussian() * 0.1; // Small additive mutation (fine-tuning)
+        } 
+        else if (threshold < 0.3) 
+        {
+            d *= 1 + (rand.nextGaussian() * 0.1); // Small multiplicative mutation (fine-tuning)
+        } 
+        else if (threshold < 0.4) 
+        {
+            d *= rand.nextBoolean() ? 0.5 : 2.0; // Scale up/down (moderate change)
+        } 
+        else if (threshold < 0.5)
+        {
+            d += (rand.nextDouble() * 2 - 1) * 0.5; // Random shift within [-0.5, 0.5] (exploration)
+        } 
+        else if (threshold < 0.6) 
+        {
+            d *= (rand.nextDouble() * 2.0); // Random scaling within [0, 2] (high variance)
+        }
+        // Prevent weight explosion or collapse
+        if (Double.isNaN(d) || Double.isInfinite(d)) 
+        {
+            return rand.nextDouble() * 2 - 1; // Reset to a random weight between -1 and 1
+        }
+    
         return d;
     }
+    
 
     private void setMSE( double [] expected )
     {
