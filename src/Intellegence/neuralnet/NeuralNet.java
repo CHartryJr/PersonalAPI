@@ -322,29 +322,11 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         if(o == null)
             return 1;
 
-        int flag = 0;
-        if( this.fitness < o.fitness )
+        int flag = Double.compare(this.fitness, o.fitness);
+        
+        if ( flag == 0)
         {
-            flag = -1;
-        }
-         else if ( this.fitness > o.fitness )
-        {
-            flag = 1;
-        }
-         else if ( this.fitness == o.fitness )
-        {
-            if( this.MSE < o.MSE)
-            {
-                flag = 1;
-            }
-             else if ( this.MSE > o.MSE )
-            {
-                flag = -1;
-            }
-            else if ( this.MSE == o.MSE )
-            {
-                flag = 0; 
-            }
+            flag = Double.compare(this.MSE, o.MSE);
         }
         return flag;
     }
