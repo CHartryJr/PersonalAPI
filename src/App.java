@@ -95,8 +95,7 @@ public class App
                         else 
                         {
                             currentFitness -=  2;
-                            neuralNet.setFitness(neuralNet.getFitness() + currentFitness);
-                            random = new Random();
+                            neuralNet.setFitness(neuralNet.getFitness() + currentFitness); 
                             adaptiveMutation(neuralNet);
 
                            
