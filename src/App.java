@@ -19,6 +19,7 @@ public class App
     private static final int SUCCESSFUL_MOVE_THRESHOLD = 10;
     private static final int THREAD_SLEEP_DURATION = 75;
     private static final int FITNESS_INCREMENT = 20;
+    private static final int TIME_INTRVAL = 3;
 
     public static void main(String[] args) 
     {
@@ -54,7 +55,7 @@ public class App
         {
             LocalTime currentTime = LocalTime.now();
 
-            if (currentTime.getMinute() % 40 == 0 && isCleared) 
+            if (currentTime.getHour() % TIME_INTRVAL == 0 && isCleared) 
             {
                 clearConsole();
                 System.out.println("New Model Loaded\n");
@@ -103,7 +104,7 @@ public class App
                         currentFitness = 0;
                         isNewRecord = false;
 
-                        if (currentTime.getMinute() % 10 == 1) 
+                        if (currentTime.getHour() % TIME_INTRVAL == 1) 
                         {
                             isCleared = true;
                         }
