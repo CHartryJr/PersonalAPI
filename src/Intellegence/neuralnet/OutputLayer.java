@@ -34,8 +34,9 @@ public class OutputLayer extends Layer
         if( prev == null)
             throw new UnsupportedOperationException("There are no linked layers to tghe output layer look over network");
 
-        for(Neuron x : neurons)
+        for(int j = 0; j< neurons.size();++j)
         {   
+            Neuron x = neurons.get(j);
             double net = 0.0d; 
             for(int i = 0; i <  prev.neurons.size(); ++i)
             {

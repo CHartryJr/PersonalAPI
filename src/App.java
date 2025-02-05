@@ -15,7 +15,7 @@ public class App
     private static final String ASSET_DIR = "/assets/Snake/";
     private static final String BEST_NETWORK_FILE = "BestSnakePlayer";
     private static final String BEST_SCORE_FILE = "BestScore.txt";
-    private static final int MUTATION_INTERVAL = 30;
+    private static final int MUTATION_INTERVAL = 1000;
     private static final int SUCCESSFUL_MOVE_THRESHOLD = 10;
     private static final int THREAD_SLEEP_DURATION = 75;
     private static final int FITNESS_INCREMENT = 20;

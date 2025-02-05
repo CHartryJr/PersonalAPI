@@ -240,7 +240,7 @@ public class GameMenu extends GameScene
 
     @Override
     public double[] getEnviroment() {
-        // TODO Auto-generated method stub
+
         throw new UnsupportedOperationException("Unimplemented method 'getEnviroment'");
     }
 }

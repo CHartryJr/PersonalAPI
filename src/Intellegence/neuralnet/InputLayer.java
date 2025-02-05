@@ -40,8 +40,9 @@ public class InputLayer extends Layer
     @Override
     void activate() 
     {
-        for(Neuron x : neurons)
+        for(int j = 0; j< neurons.size();++j)
         {
+            Neuron x = neurons.get(j);
             double net = 0.0d;
             for(int i = 0; i <  currerntInput.length; ++i)
             {
