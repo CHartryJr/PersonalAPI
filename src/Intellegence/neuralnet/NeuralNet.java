@@ -60,10 +60,12 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     {
         this( 1,0,1,1 );
     }
+
     public double[] getCurrentInput()
     {
         return firstLayer.getCurrentInput();
     }
+    
     /**
      * @return the size
      */
@@ -440,13 +442,15 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
 
     private void init()
     {
-       rand = new Random(System.currentTimeMillis());
+        int hiddenNeuronCount,reconNeurons = (numberOfInputs + numberOfOutPuts)/2;
+        rand = new Random(System.currentTimeMillis());
         firstLayer = new InputLayer(numberOfInputs);
         Layer currentLayer = firstLayer;
         size = 2;
         for(int i = 0 ;i < numberOfHiddenLayers; ++i)
         {
-            currentLayer.next = new HiddenLayer(rand.nextInt(MAX_NUMBER_NEURONS) + 1);
+            hiddenNeuronCount = MAX_NUMBER_NEURONS - reconNeurons < 0 ? reconNeurons : (reconNeurons + rand.nextInt(MAX_NUMBER_NEURONS - reconNeurons));
+            currentLayer.next = new HiddenLayer(hiddenNeuronCount);
             currentLayer.init();
             currentLayer.next.prev = currentLayer;
             currentLayer = currentLayer.next;
@@ -461,8 +465,8 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
 
     private double transform(double d) 
     {
+        rand = new Random(System.currentTimeMillis());
         double threshold = rand.nextDouble();
-    
         if (threshold < 0.1) 
         {
             d = -d; // Flip sign (exploration)

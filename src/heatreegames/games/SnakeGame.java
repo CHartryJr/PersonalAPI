@@ -181,7 +181,7 @@ public class SnakeGame extends GameScene
     }
 
     @Override
-    protected void handleKeyPress(int keyCode) 
+    protected  void handleKeyPress(int keyCode) 
     {
       //System.out.println(String.format("Your movement keypad {%d}",keyCode));
     
@@ -250,8 +250,12 @@ public class SnakeGame extends GameScene
     @Override
     public double[] getEnviroment() 
     {
-        return new double[]{body, x[0], y[0], appleLocx, appleLocy, SCREEN_WIDTH, SCREEN_HEIGHT};
+        Double curDirect = dir == 'L'? 37d : 
+                        dir == 'U'? 38d: 
+                        dir == 'R'? 39d : 40d;
+        return new double[]{body, x[0], y[0], appleLocx, appleLocy, SCREEN_WIDTH, SCREEN_HEIGHT,curDirect};
     }
+
     public int getApplesEaten()
     {
         return applesEaten;

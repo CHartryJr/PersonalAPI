@@ -26,13 +26,14 @@ class Neuron implements Serializable
      */
     protected void init(int layerIn)
     {
-        rand = new Random();
+        rand = new Random(System.currentTimeMillis());
         bias = rand.nextDouble(2) - 1;
         weightsIn = randomizedWeightsList(layerIn);
     }
 
     protected double [] randomizedWeightsList(int size)
     {
+        rand = new Random(System.currentTimeMillis());
         double [] weights = new double[size];
         for (int i = 0; i < size; ++i) 
         {

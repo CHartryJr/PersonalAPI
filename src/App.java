@@ -15,7 +15,7 @@ public class App
     private static final String ASSET_DIR = "/assets/Snake/";
     private static final String BEST_NETWORK_FILE = "BestSnakePlayer";
     private static final String BEST_SCORE_FILE = "BestScore.txt";
-    private static final int MUTATION_INTERVAL = 100;
+    private static final int MUTATION_INTERVAL = 1;
     private static final int SUCCESSFUL_MOVE_THRESHOLD = 10;
     private static final int THREAD_SLEEP_DURATION = 75;
     private static final int FITNESS_INCREMENT = 20;
@@ -48,9 +48,10 @@ public class App
         ExternalInputAdapter aiController = new ExternalInputAdapter();
         String networkPath = workingDirectory + ASSET_DIR + BEST_NETWORK_FILE;
         String scorePath = workingDirectory + ASSET_DIR + BEST_SCORE_FILE;
-        NeuralNet neuralNet = loadNetwork(networkPath);
+         NeuralNet neuralNet = loadNetwork(networkPath);
         highScore = loadScore(scorePath);
-        
+        neuralNet.setLearningRate(1E-2);
+       
         while (applesCollected < SUCCESSFUL_MOVE_THRESHOLD) 
         {
             LocalTime currentTime = LocalTime.now();
@@ -90,13 +91,13 @@ public class App
                             }
 
                             previousScore = applesCollected > previousScore ? applesCollected:previousScore;
-                            neuralNet.setFitness(neuralNet.getFitness() + currentFitness);
+                            neuralNet.setFitness((neuralNet.getFitness() * 0.95 + currentFitness));
                             saveBest(networkPath, neuralNet);
                         } 
                         else 
                         {
                             currentFitness -=  2;
-                            neuralNet.setFitness(neuralNet.getFitness() + currentFitness); 
+                            neuralNet.setFitness((neuralNet.getFitness() * 0.95 + currentFitness)); 
                             adaptiveMutation(neuralNet);
                         }
 
@@ -121,18 +122,42 @@ public class App
                     boolean isBound  = isBound(gameState),isTracking = aiController.isTracking();
                     neuralNet.observe(gameState);
                     neuralNet.forward();
-                    aiController.getExternalPrediction(neuralNet.predict());
+                    double [] aiPredict = exploration(neuralNet);
+                    aiController.getExternalPrediction(aiPredict);
                     currentFitness += isTracking ? 2 : -3;
                     
                     if(isBound )// if out of bounds
-                        currentFitness -= FITNESS_INCREMENT;
+                        currentFitness -= FITNESS_INCREMENT*2;
+
                     applesCollected = game.getApplesEaten();
-                   // printNetworkUpdate(neuralNet);
-                    System.out.printf("\rIn Game Fitness: %d | Apples Eaten: %d| Tracking : %b| (x,y) = (%d,%d) ", currentFitness, applesCollected,isTracking,(int)gameState[1],(int)gameState[2]);
+
+                    System.out.print(String.format("\r  Prediction Confidence p1:%f, p2:%f, p3:%f, p4:%f  |"
+                    ,aiPredict[0],aiPredict[1],aiPredict[2],aiPredict[3]));
+
+                    //printNetworkUpdate(neuralNet);
+
+                    //System.out.printf("\rIn Game Fitness: %d | Apples Eaten: %d | Tracking : %b | (x,y) = (%d,%d) "
+                   // , currentFitness, applesCollected,isTracking, (int)gameState[1], (int)gameState[2]);
                     isNewGame = true;    
                 }
             }
             sleepThread(THREAD_SLEEP_DURATION);
+        }
+    }
+
+    private static double[] exploration (NeuralNet net)
+    {
+        if(net.getFitness() > 1 )
+            return net.predict();
+
+        Random rand = new Random(System.currentTimeMillis());
+        if (rand.nextDouble() < 0.1) // 10% chance to explore
+        {
+            return new double[] { rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), rand.nextDouble() };
+        } 
+        else 
+        {
+            return net.predict();
         }
     }
                     
@@ -214,7 +239,7 @@ public class App
 
     private static NeuralNet loadNetwork(String path) 
     {
-        NeuralNet neuralNet = new NeuralNet(7, 1, 4);
+        NeuralNet neuralNet = new NeuralNet(8, 2, 4);
         neuralNet.setActivation(Activation.SIGMOID);
         File networkFile = new File(path);
 
@@ -240,7 +265,9 @@ public class App
             if (os.contains("win")) 
             {
                 new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-            } else {
+            } 
+            else 
+            {
                 new ProcessBuilder("clear").inheritIO().start().waitFor();
             }
         } 
@@ -253,19 +280,25 @@ public class App
     private static void saveBest(String networkPath, NeuralNet net) 
     {
         NeuralNet bestNet = loadNetwork(networkPath);
-        if (net.compareTo(bestNet) > 0) 
+        Random random = new Random();
+        
+        // Allow slight exploration by accepting networks within 5% of best fitness
+        if (net.compareTo(bestNet) > 0 || random.nextDouble() < 0.05) 
         {
             saveNetwork(net, networkPath);
             System.out.println("\nNew best network saved.");
         }
     }
 
+
     private static void adaptiveMutation(NeuralNet neuralNet) 
     {
         Random random = new Random();
-        double mutationRate = (neuralNet.getFitness() < 0) ? 0.8 : 0.2; // More mutation when fitness drops
-    
-        for (int i = 0; i < MUTATION_INTERVAL; ++i) 
+        double mutationRate = (neuralNet.getFitness() < 0) ? 0.8 : 0.2; 
+
+        int mutationAttempts = (int) (MUTATION_INTERVAL * (1 + Math.abs(neuralNet.getFitness()) / 100.0));
+
+        for (int i = 0; i < mutationAttempts; ++i) 
         {
             if (random.nextDouble() < mutationRate) 
             {
@@ -273,4 +306,5 @@ public class App
             }
         }
     }
+
 }

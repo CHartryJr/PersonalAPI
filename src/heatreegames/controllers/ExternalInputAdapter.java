@@ -35,7 +35,7 @@ public class ExternalInputAdapter extends KeyAdapter
      * get the prediction from outside source
      * @param externalPrediction
      */
-    public void getExternalPrediction(double [] externalPrediction) 
+    public synchronized  void getExternalPrediction(double [] externalPrediction) 
     {
        this.prediction = externalPrediction;
     }
@@ -49,7 +49,7 @@ public class ExternalInputAdapter extends KeyAdapter
         return isTracking;
     }
 
-    public void setEnviroment(double[] enviroment) 
+    public synchronized void setEnviroment(double[] enviroment) 
     {
        this.env = enviroment;
     }
@@ -59,20 +59,21 @@ public class ExternalInputAdapter extends KeyAdapter
        return env;
     }
 
-    private int predictMove() 
+    private synchronized int predictMove() 
     {
         nextMove = random.nextInt(KEY_CODE_RANGE) + 37;
         if(prediction != null)
         if (env != null) 
         {
-            //String output = "|";
+            // String output = "|";
             isTracking = isCloser();
             nextMove = 37 + argMax(prediction);
                         // output = nextMove == 37 ? "Left": 
                         // nextMove == 38 ? "Up": 
                         // nextMove == 39 ? "Right": 
                         // nextMove == 40 ? "Down": "Unknown move "+ nextMove;
-                        // System.out.print(" Agent moved "+output+"|");
+                        // System.out.print(String.format("\r Agent moved %s | Prediction Confidence p1:%f, p2:%f, p3:%f, p4:%f  |"
+                        // ,output,prediction[0],prediction[1],prediction[2],prediction[3]));
                   
             prevMov[0] = env[1];
             prevMov[1] = env[3];
