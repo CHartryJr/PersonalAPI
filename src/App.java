@@ -140,7 +140,7 @@ public class App
                         neuralNet.forward();
                         double [] aiPredict = exploration(neuralNet);
                         aiController.getExternalPrediction(aiPredict);
-                        System.out.print(String.format("\r %s", neuralNet));
+                        //System.out.print(String.format("\r %s", neuralNet));
                     } 
                     finally 
                     {
