@@ -13,7 +13,7 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     private InputLayer firstLayer;
     private OutputLayer lastLayer;
     private Random rand;
-    private double fitness,MSE,learningRate;
+    private double fitness,MSE,learningRate,mutationRate,mutationScale;
     private final int MAX_NUMBER_NEURONS;
     private int numberOfInputs, numberOfHiddenLayers, numberOfOutPuts, size;
     
@@ -38,6 +38,9 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         this.numberOfOutPuts = numberOfOutPuts;
         this.numberOfInputs = numberOfInputs;
         firstLayer  = null;
+        mutationRate = .01d;
+        mutationScale = .01d;
+        rand = new Random(System.currentTimeMillis());
         init();
     }
 
@@ -61,13 +64,36 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         this( 1,0,1,1 );
     }
 
+    /**
+     * Sets the mutation rate, ensuring it stays within the valid range [0.1, 0.8].
+     * @param mutationRate The mutation rate to be set.
+     */
+    public void setMutationRate(double mutationRate) 
+    {
+        this.mutationRate = mutationRate > .8d ? .8d :
+                            mutationRate < .1d ? .1d : mutationRate;
+    }
+    /**
+     * Sets the mutation scale, ensuring it stays within the valid range [0.1, 10].
+     * @param mutationScale The mutation scale to be set.
+     */
+    public void setMutationScale(double mutationScale) 
+    {
+        this.mutationScale = mutationScale > 10d ? 10d :
+                             mutationScale < .1d ? .1d : mutationScale;
+    }
+    /**
+     * Retrieves the current input values from the first layer of the neural network.
+     * @return An array of double values representing the current input.
+     */
     public double[] getCurrentInput()
     {
         return firstLayer.getCurrentInput();
     }
     
     /**
-     * @return the size
+     * Retrieves the number of layers in the neural network.
+     * @return The size of the network.
      */
     public int getSize() 
     {
@@ -75,7 +101,7 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     }
 
     /**
-     * @apiNote This function is used to make a slight change to each weight and bias in the network
+     * Applies mutation to the network by modifying weights and biases randomly.
      */
     public void  mutate()
     {
@@ -97,7 +123,12 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
             cuLayer = cuLayer.next;
         }
     }
-
+    /**
+     * Removes a hidden layer at a specific index.
+     * @param index The index of the hidden layer to be removed.
+     * @return The removed HiddenLayer.
+     * @throws IndexOutOfBoundsException If the index is invalid.
+     */
     public HiddenLayer removeHiddenLayer(int index)
     {
         if(size == 2 | index < 0 | index >= size | index + 1 == size - 1)
@@ -115,12 +146,20 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         --size;
         return (HiddenLayer)currentLayer;
     }
-
+    /**
+     * Removes the first hidden layer.
+     * @return The removed HiddenLayer.
+     */
     public Layer removeHiddenLayer()
     {
         return removeHiddenLayer(0);
     }
-
+    /**
+     * Adds a hidden layer at a specific index.
+     * @param index The index where the new hidden layer should be inserted.
+     * @param newLayer The new HiddenLayer to be added.
+     * @throws IndexOutOfBoundsException If the index is invalid.
+     */
     public void addHiddenLayer(int index, HiddenLayer newLayer)
     {
         if(index < 0 | index >= size | index == size - 1)
@@ -138,12 +177,20 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
             newLayer.next.init();
             ++size;   
     }
-
+    /**
+     * Adds a hidden layer at the first available position.
+     * @param newLayer The new HiddenLayer to be added.
+     */
     public void addHiddenLayer(HiddenLayer newLayer)
     {
         addHiddenLayer(0,newLayer);
     }
-
+    /**
+     * Retrieves a hidden layer at a specific index.
+     * @param index The index of the hidden layer to retrieve.
+     * @return The requested HiddenLayer.
+     * @throws IndexOutOfBoundsException If the index is invalid.
+     */
     public HiddenLayer getHiddenLayer(int index)
     {
         if(index < 0 | index >= size | index == size - 1)
@@ -155,7 +202,13 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         }
         return (HiddenLayer)currentLayer;
     }
-
+    /**
+     * Replaces a hidden layer at a given index with a new layer.
+     * @param index The index of the layer to be replaced.
+     * @param newLayer The new layer to insert.
+     * @return The replaced HiddenLayer.
+     * @throws IndexOutOfBoundsException If the index is invalid.
+     */
     public HiddenLayer replace(int index, Layer newLayer)
     {
         if(size == 2 | index < 0 | index >= size | index + 1 == size - 1)
@@ -175,7 +228,11 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         newLayer.init();
         return (HiddenLayer)currentLayer;
     }
-
+    /**
+     * Sets the input of the neural network.
+     * @param parsept An array representing the input values.
+     * @throws RuntimeException If the input is null.
+     */
     @Override
     public void observe(double[]parsept) 
     {
@@ -185,9 +242,8 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     }
 
     /**
-     * @apiNote This function is used to take in a input and prepare the network
-     * @param parsept
-     * @implNote Warnning!!! Changing shape of the input will result in a Changing input weights
+     * Observes a two-dimensional input and flattens it before feeding it into the network.
+     * @param parsept A 2D array representing input values.
      */
     public void observe(double[][]parsept) 
     {
@@ -195,7 +251,8 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     }
 
     /**
-     * @return the fitness
+     * Retrieves the current fitness value of the network.
+     * @return The fitness score.
      */
     public double getFitness() 
     {
@@ -203,7 +260,8 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     }
 
     /**
-     * @param fitness the fitness to set
+     * Sets the fitness score of the neural network.
+     * @param fitness The fitness score to set.
      */
     public void setFitness(double fitness)
      {
@@ -211,7 +269,8 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     }
 
     /**
-     * @return the learningRate
+     * Retrieves the current learning rate of the network.
+     * @return The learning rate.
      */
     public double getLearningRate() 
     {
@@ -219,21 +278,24 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     }
 
     /**
-     * @param learningRate the learningRate to set
+     * Sets the learning rate of the neural network.
+     * @param learningRate The learning rate to set.
      */
     public void setLearningRate(double learningRate) 
     {
         this.learningRate = learningRate;
     }
-
     /**
-     * @param precision the precision to set
+     * Sets the precision for the output layer calculations.
+     * @param precision The precision value.
      */
     public void setPrecision(int precision) 
     {
         lastLayer.setPrecision(precision);
     }
-
+    /**
+     * Propagates input forward through the network layers.
+     */
     public void forward()
     {
         Layer currentLayer  = firstLayer;
@@ -243,12 +305,20 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
             currentLayer = currentLayer.next;
         }
     }
-
+    /**
+     * Trains the neural network with a given regiment and expected outputs.
+     * @param regiment The training regiment type.
+     * @param expected The expected outputs in a 2D array format.
+     */
     public void train(int regiment, double [][] expected )
     { 
         train(regiment, flatten(expected));
     }
-
+    /**
+     * Trains the neural network with a given regiment and expected outputs.
+     * @param regiment The training regiment type.
+     * @param expected The expected outputs in a 1D array format.
+     */
     public void train(int regiment, double [] expected )
     {
         switch (regiment) 
@@ -263,7 +333,10 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         }
 
     } 
-
+    /**
+     * Sets the activation function for all layers in the network.
+     * @param e The activation function to apply.
+     */
     public void  setActivation(Activation e)
     {
         Layer currentLayer = firstLayer;
@@ -273,7 +346,12 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
             currentLayer = currentLayer.next;
         }
     }
-
+    /**
+     * Sets the activation function for a specific layer index.
+     * @param e The activation function to apply.
+     * @param index The index of the layer.
+     * @throws IndexOutOfBoundsException If the index is invalid.
+     */
     public void  setActivation(Activation e, int index)
     {
         if( index < 0  | index >= size)
@@ -287,10 +365,9 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
             currentLayer = currentLayer.next;
         }
     }
-
     /**
-     * @implNote Must call Observe before using this method call.
-     * @return
+     * Runs the network prediction using current input values.
+     * @return The predicted output values as an array.
      */
     public double[] predict()
     {   
@@ -298,13 +375,17 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     } 
 
     /**
-     * @return the mSE
-     */
+    * Retrieves the Mean Squared Error (MSE) of the network.
+    * @return The MSE value.
+    */
     public double getError() 
     {
         return MSE;
     }
-    
+    /**
+     * Provides a string representation of the network structure.
+     * @return A formatted string representing the network.
+     */
     @Override
     public String toString()
     {
@@ -317,7 +398,11 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         }
         return message;
     }
-
+    /**
+     * Compares the fitness and error values between this and another NeuralNet instance.
+     * @param o The other NeuralNet instance to compare.
+     * @return Comparison result as an integer.
+     */
     @Override
     public int compareTo(NeuralNet o) 
     {
@@ -332,7 +417,11 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         }
         return flag;
     }
-
+    /**
+     * Saves the neural network state to a file.
+     * @param loc The file location to save the object.
+     * @return True if successful, false otherwise.
+     */
     public boolean saveStream(String loc)
     {
          try
@@ -353,7 +442,11 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
             return false;
         }
     }
-    
+    /**
+     * Loads a neural network state from a file.
+     * @param loc The file location to load the object from.
+     * @return True if successful, false otherwise.
+     */
     public boolean loadStream(String loc)
     {
          try
@@ -463,41 +556,37 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
         lastLayer.init();
     }
 
-    private double transform(double d) 
+    private double transform(double value) 
     {
-        rand = new Random(System.currentTimeMillis());
         double threshold = rand.nextDouble();
-        if (threshold < 0.1) 
-        {
-            d = -d; // Flip sign (exploration)
-        } 
-        else if (threshold < 0.2) 
-        {
-            d += rand.nextGaussian() * 0.1; // Small additive mutation (fine-tuning)
-        } 
-        else if (threshold < 0.3) 
-        {
-            d *= 1 + (rand.nextGaussian() * 0.1); // Small multiplicative mutation (fine-tuning)
-        } 
-        else if (threshold < 0.4) 
-        {
-            d *= rand.nextBoolean() ? 0.5 : 2.0; // Scale up/down (moderate change)
-        } 
-        else if (threshold < 0.5)
-        {
-            d += (rand.nextDouble() * 2 - 1) * 0.5; // Random shift within [-0.5, 0.5] (exploration)
-        } 
-        else if (threshold < 0.6) 
-        {
-            d *= (rand.nextDouble() * 2.0); // Random scaling within [0, 2] (high variance)
-        }
-        // Prevent weight explosion or collapse
-        if (Double.isNaN(d) || Double.isInfinite(d)) 
-        {
-            return rand.nextDouble() * 2 - 1; // Reset to a random weight between -1 and 1
-        }
-    
-        return d;
+
+    if (threshold < mutationRate * 0.2) 
+    {
+        value = -value; // Flip sign
+    } 
+    else if (threshold < mutationRate * 0.4) 
+    {
+        value += rand.nextGaussian() * mutationScale * 0.1; // Small additive mutation
+    } 
+    else if (threshold < mutationRate * 0.6) 
+    {
+        value *= 1 + (rand.nextGaussian() * mutationScale * 0.1); // Small multiplicative mutation
+    } 
+    else if (threshold < mutationRate * 0.8) 
+    {
+        value *= rand.nextBoolean() ? (1.0 + mutationScale * 0.1) : (1.0 - mutationScale * 0.1);
+    } 
+    else if (threshold < mutationRate) 
+    {
+        value += (rand.nextDouble() * 2 - 1) * mutationScale * 0.5; // Random shift
+    }
+
+    // Prevent extreme values
+    double maxValue = mutationScale * 10;
+    double minValue = -maxValue;
+    value = Math.max(minValue, Math.min(maxValue, value));
+
+    return value;
     }
     
 

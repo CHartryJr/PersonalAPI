@@ -4,11 +4,12 @@ import heatreegames.games.SnakeGame;
 import Intellegence.neuralnet.Activation;
 import Intellegence.neuralnet.NeuralNet;
 import java.util.Random;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.swing.SwingUtilities;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.time.LocalTime;
 
 public class App 
 {
@@ -19,7 +20,8 @@ public class App
     private static final int SUCCESSFUL_MOVE_THRESHOLD = 10;
     private static final int THREAD_SLEEP_DURATION = 75;
     private static final int FITNESS_INCREMENT = 20;
-    private static final int TIME_INTRVAL = 3;
+    private static final int TIME_INTERVAL = 3;
+    private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public static void main(String[] args) 
     {
@@ -35,34 +37,33 @@ public class App
         });
     }
 
-    public static void printNetworkUpdate(NeuralNet net)
-    {
-        System.out.print("\r");
-        System.out.print(" "+ net);
-    }
-
     private static void trainSnakeAI(GameFrame gameFrame, String workingDirectory) 
     {
-        boolean isNewRecord = false, isNewGame = false, isCleared = false;
-        int  applesCollected = 0, highScore, previousScore = 0, currentFitness = 0;
+        boolean isNewRecord = false, isNewGame = false;
+        int applesCollected = 0, highScore, previousScore = 0, currentFitness = 0,gameCounter = 1000;
         ExternalInputAdapter aiController = new ExternalInputAdapter();
         String networkPath = workingDirectory + ASSET_DIR + BEST_NETWORK_FILE;
         String scorePath = workingDirectory + ASSET_DIR + BEST_SCORE_FILE;
-         NeuralNet neuralNet = loadNetwork(networkPath);
+        long duration =0, startTime =0, endTime;
+        NeuralNet neuralNet = loadNetwork(networkPath);
         highScore = loadScore(scorePath);
+        neuralNet.setActivation(Activation.RECTIFIED_LINEAR_UNIT);
         neuralNet.setLearningRate(1E-2);
        
         while (applesCollected < SUCCESSFUL_MOVE_THRESHOLD) 
         {
-            LocalTime currentTime = LocalTime.now();
-
-            if (currentTime.getHour() % TIME_INTRVAL == 0 && isCleared) 
+            if (gameCounter == 0) 
             {
                 clearConsole();
                 System.out.println("New Model Loaded\n");
-                NeuralNet tempNet = loadNetwork(networkPath);
-                neuralNet = (tempNet.compareTo(neuralNet) > 0) ? tempNet : neuralNet;
-                isCleared = false;
+                lock.writeLock().lock();
+                try {
+                    NeuralNet tempNet = loadNetwork(networkPath);
+                    neuralNet = (tempNet.compareTo(neuralNet) > 0) ? tempNet : neuralNet;
+                } finally {
+                    lock.writeLock().unlock();
+                }
+                gameCounter = 1000;
             }
 
             synchronized (gameFrame.getTreeLock()) 
@@ -76,69 +77,81 @@ public class App
 
                 if (!game.gameIsRunning()) 
                 {
-                    if (!isNewGame) //evalute play at end of game
+                    if (isNewGame) // Evaluate play at the end of the game
                     {
                         isNewRecord = applesCollected > highScore;
-
+                        endTime = System.currentTimeMillis();
+                        if(duration > (endTime - startTime))
+                        {
+                            duration = (endTime - startTime);
+                            currentFitness += (FITNESS_INCREMENT/3);
+                        }
+                        
                         if (isNewRecord || applesCollected > previousScore) 
                         {
-                            if (isNewRecord) 
+                            lock.writeLock().lock();
+                            try 
                             {
                                 currentFitness += FITNESS_INCREMENT;
-                                saveScore(scorePath, applesCollected);
+                                if (isNewRecord) 
+                                {
+                                    saveScore(scorePath, applesCollected);
+                                    saveBest(networkPath, neuralNet);
+                                    System.out.println(String.format("New High Score! Apples: %d with Fitness %d" , applesCollected,(int)neuralNet.getFitness()));
+                                }
+                                previousScore = Math.max(applesCollected, previousScore);
+                                neuralNet.setFitness((neuralNet.getFitness() * 0.95 + currentFitness));
                                 saveBest(networkPath, neuralNet);
-                                System.out.println(String.format("New High Score! Apples: %d with Fitness %d" , applesCollected,(int)neuralNet.getFitness()));
+                            } finally {
+                                lock.writeLock().unlock();
                             }
-
-                            previousScore = applesCollected > previousScore ? applesCollected:previousScore;
-                            neuralNet.setFitness((neuralNet.getFitness() * 0.95 + currentFitness));
-                            saveBest(networkPath, neuralNet);
                         } 
                         else 
                         {
-                            currentFitness -=  2;
-                            neuralNet.setFitness((neuralNet.getFitness() * 0.95 + currentFitness)); 
-                            adaptiveMutation(neuralNet);
+                            lock.writeLock().lock();
+                            try {
+                                neuralNet.setFitness((neuralNet.getFitness() * 0.95 + currentFitness));
+                                adaptiveMutation(neuralNet);
+                            } finally {
+                                lock.writeLock().unlock();
+                            }
+                            gameCounter -= 1;
                         }
-
                         applesCollected = 0;
                         currentFitness = 0;
                         isNewRecord = false;
-
-                        if (currentTime.getHour() % TIME_INTRVAL == 1) 
-                        {
-                            isCleared = true;
-                        }
+                        
                     }
+                    startTime = System.currentTimeMillis();
                     isNewGame = false;
                     continue;
                 }
-
                 game.swapController(aiController);
                 double[] gameState = aiController.getEnviroment();
-                
+                isNewGame = true;
                 if (gameState != null) 
                 {
-                    boolean isBound  = isBound(gameState),isTracking = aiController.isTracking();
-                    neuralNet.observe(gameState);
-                    neuralNet.forward();
-                    double [] aiPredict = exploration(neuralNet);
-                    aiController.getExternalPrediction(aiPredict);
-                    currentFitness += isTracking ? 2 : -3;
                     
-                    if(isBound )// if out of bounds
-                        currentFitness -= FITNESS_INCREMENT*2;
+                    boolean isBound  = isBound(gameState);
+                    boolean isTracking = aiController.isTracking();
+                    lock.readLock().lock();
+                    try {
+                        neuralNet.observe(gameState);
+                        neuralNet.forward();
+                        double [] aiPredict = exploration(neuralNet);
+                        aiController.getExternalPrediction(aiPredict);
+                        System.out.print(String.format("\r %s", neuralNet));
+                    } 
+                    finally 
+                    {
+                        lock.readLock().unlock();
+                    }
+                    
+                    currentFitness += isTracking ? (.06666667 * FITNESS_INCREMENT) : -(.1 * FITNESS_INCREMENT);
+                    if (isBound) // If out of bounds
+                        currentFitness -= (FITNESS_INCREMENT/3);
 
                     applesCollected = game.getApplesEaten();
-
-                    System.out.print(String.format("\r  Prediction Confidence p1:%f, p2:%f, p3:%f, p4:%f  |"
-                    ,aiPredict[0],aiPredict[1],aiPredict[2],aiPredict[3]));
-
-                    //printNetworkUpdate(neuralNet);
-
-                    //System.out.printf("\rIn Game Fitness: %d | Apples Eaten: %d | Tracking : %b | (x,y) = (%d,%d) "
-                   // , currentFitness, applesCollected,isTracking, (int)gameState[1], (int)gameState[2]);
-                    isNewGame = true;    
                 }
             }
             sleepThread(THREAD_SLEEP_DURATION);
@@ -282,7 +295,6 @@ public class App
         NeuralNet bestNet = loadNetwork(networkPath);
         Random random = new Random();
         
-        // Allow slight exploration by accepting networks within 5% of best fitness
         if (net.compareTo(bestNet) > 0 || random.nextDouble() < 0.05) 
         {
             saveNetwork(net, networkPath);
@@ -294,7 +306,7 @@ public class App
     private static void adaptiveMutation(NeuralNet neuralNet) 
     {
         Random random = new Random();
-        double mutationRate = (neuralNet.getFitness() < 0) ? 0.8 : 0.2; 
+        double mutationRate =  Math.exp(-Math.abs(neuralNet.getFitness()) / 50.0);; 
 
         int mutationAttempts = (int) (MUTATION_INTERVAL * (1 + Math.abs(neuralNet.getFitness()) / 100.0));
 
@@ -307,4 +319,5 @@ public class App
         }
     }
 
+   
 }
