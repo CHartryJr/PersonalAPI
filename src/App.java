@@ -89,13 +89,13 @@ public class App
                             currentFitness += (FITNESS_INCREMENT/3);
                         }
                         
-                        if (isNewRecord || applesCollected > previousScore) 
+                        if (isNewRecord == true || applesCollected > previousScore) 
                         {
                             lock.writeLock().lock();
                             try 
                             {
                                 currentFitness += FITNESS_INCREMENT;
-                                if (isNewRecord) 
+                                if (isNewRecord == true) 
                                 {
                                     saveScore(scorePath, applesCollected);
                                     saveBest(networkPath, neuralNet);
@@ -104,17 +104,22 @@ public class App
                                 previousScore = Math.max(applesCollected, previousScore);
                                 neuralNet.setFitness((neuralNet.getFitness() * 0.95 + currentFitness));
                                 saveBest(networkPath, neuralNet);
-                            } finally {
+                            } 
+                            finally 
+                            {
                                 lock.writeLock().unlock();
                             }
                         } 
                         else 
                         {
                             lock.writeLock().lock();
-                            try {
+                            try 
+                            {
                                 neuralNet.setFitness((neuralNet.getFitness() * 0.95 + currentFitness));
                                 adaptiveMutation(neuralNet);
-                            } finally {
+                            } 
+                            finally 
+                            {
                                 lock.writeLock().unlock();
                             }
                             gameCounter -= 1;
