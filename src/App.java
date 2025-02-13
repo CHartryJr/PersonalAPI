@@ -20,8 +20,8 @@ public class App
     private static final int SUCCESSFUL_MOVE_THRESHOLD = 10;
     private static final int THREAD_SLEEP_DURATION = 75;
     private static final int FITNESS_INCREMENT = 20;
-    private static final int TIME_INTERVAL = 3;
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private static Random rand;
 
     public static void main(String[] args) 
     {
@@ -45,7 +45,9 @@ public class App
         String networkPath = workingDirectory + ASSET_DIR + BEST_NETWORK_FILE;
         String scorePath = workingDirectory + ASSET_DIR + BEST_SCORE_FILE;
         long duration =0, startTime =0, endTime;
+
         NeuralNet neuralNet = loadNetwork(networkPath);
+        rand = new Random(System.currentTimeMillis());
         highScore = loadScore(scorePath);
         neuralNet.setActivation(Activation.RECTIFIED_LINEAR_UNIT);
         neuralNet.setLearningRate(1E-2);
@@ -120,7 +122,7 @@ public class App
                         applesCollected = 0;
                         currentFitness = 0;
                         isNewRecord = false;
-                        
+                        rand = new Random(System.currentTimeMillis());
                     }
                     startTime = System.currentTimeMillis();
                     isNewGame = false;
@@ -163,7 +165,7 @@ public class App
         if(net.getFitness() > 1 )
             return net.predict();
 
-        Random rand = new Random(System.currentTimeMillis());
+        
         if (rand.nextDouble() < 0.1) // 10% chance to explore
         {
             return new double[] { rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), rand.nextDouble() };
@@ -293,9 +295,8 @@ public class App
     private static void saveBest(String networkPath, NeuralNet net) 
     {
         NeuralNet bestNet = loadNetwork(networkPath);
-        Random random = new Random();
         
-        if (net.compareTo(bestNet) > 0 || random.nextDouble() < 0.05) 
+        if (net.compareTo(bestNet) > 0 || rand.nextDouble() < 0.05) 
         {
             saveNetwork(net, networkPath);
             System.out.println("\nNew best network saved.");
@@ -305,14 +306,14 @@ public class App
 
     private static void adaptiveMutation(NeuralNet neuralNet) 
     {
-        Random random = new Random();
+       
         double mutationRate =  Math.exp(-Math.abs(neuralNet.getFitness()) / 50.0);; 
 
         int mutationAttempts = (int) (MUTATION_INTERVAL * (1 + Math.abs(neuralNet.getFitness()) / 100.0));
 
         for (int i = 0; i < mutationAttempts; ++i) 
         {
-            if (random.nextDouble() < mutationRate) 
+            if (rand.nextDouble() < mutationRate) 
             {
                 neuralNet.mutate();
             }

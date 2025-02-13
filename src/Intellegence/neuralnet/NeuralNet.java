@@ -106,7 +106,7 @@ public class NeuralNet implements Encephalon<double[],double[]>, Comparable<Neur
     public void  mutate()
     {
         Layer cuLayer = firstLayer;
-        rand = new Random(System.currentTimeMillis());
+        //rand = new Random(System.currentTimeMillis());
 
         while(cuLayer != null)
         {

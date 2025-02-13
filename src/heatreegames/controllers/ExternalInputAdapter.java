@@ -68,11 +68,11 @@ public class ExternalInputAdapter extends KeyAdapter
             nextMove = random.nextInt(KEY_CODE_RANGE) + 37;
             if (prediction != null && env != null) 
             {
-                printLog();
                 isTracking = isCloser();
                 nextMove = 37 + argMax(prediction);
                 prevMov[0] = env[1];
                 prevMov[1] = env[3];
+                //printLog();
             }
             return nextMove;
         } finally {
