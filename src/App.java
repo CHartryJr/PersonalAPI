@@ -81,6 +81,7 @@ public class App
                 {
                     if (isNewGame) // Evaluate play at the end of the game
                     {
+                        highScore = loadScore(scorePath);
                         isNewRecord = applesCollected > highScore;
                         endTime = System.currentTimeMillis();
                         if(duration > (endTime - startTime))
