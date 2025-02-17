@@ -99,7 +99,7 @@ public class App
                                 if (isNewRecord == true) 
                                 {
                                     saveScore(scorePath, applesCollected);
-                                    saveBest(networkPath, neuralNet);
+                                    saveNetwork( neuralNet,networkPath);
                                     System.out.println(String.format("New High Score! Apples: %d with Fitness %d" , applesCollected,(int)neuralNet.getFitness()));
                                 }
                                 previousScore = Math.max(applesCollected, previousScore);
@@ -325,6 +325,5 @@ public class App
             }
         }
     }
-
-   
+ 
 }
