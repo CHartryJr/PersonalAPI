@@ -44,7 +44,7 @@ public abstract class GameScene extends JPanel implements ActionListener
     
 
     // Abstract methods for game-specific behavior
-    public abstract double[] getEnviroment();
+    protected abstract double[] getEnviroment();
     
     protected abstract void startGame();
 

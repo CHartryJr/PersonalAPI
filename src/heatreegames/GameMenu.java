@@ -239,7 +239,7 @@ public class GameMenu extends GameScene
     }
 
     @Override
-    public double[] getEnviroment() {
+    protected double[] getEnviroment() {
 
         throw new UnsupportedOperationException("Unimplemented method 'getEnviroment'");
     }

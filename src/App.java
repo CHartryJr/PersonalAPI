@@ -16,7 +16,7 @@ public class App
     private static final String ASSET_DIR = "/assets/Snake/";
     private static final String BEST_NETWORK_FILE = "BestSnakePlayer";
     private static final String BEST_SCORE_FILE = "BestScore.txt";
-    private static final int MUTATION_INTERVAL = 1;
+    //private static final int MUTATION_INTERVAL = 1;
     private static final int SUCCESSFUL_MOVE_THRESHOLD = 10;
     private static final int THREAD_SLEEP_DURATION = 75;
     private static final int FITNESS_INCREMENT = 20;
@@ -49,7 +49,7 @@ public class App
         NeuralNet neuralNet = loadNetwork(networkPath);
         rand = new Random(System.currentTimeMillis());
         highScore = loadScore(scorePath);
-        neuralNet.setActivation(Activation.RECTIFIED_LINEAR_UNIT);
+        neuralNet.setActivation(Activation.HYPER_TANGENT);
         neuralNet.setLearningRate(1E-2);
        
         while (applesCollected < SUCCESSFUL_MOVE_THRESHOLD) 
@@ -140,7 +140,7 @@ public class App
                 if (gameState != null) 
                 {
                     
-                    boolean isBound  = isBound(gameState);
+                    boolean isBound  = isNotBound(gameState);
                     boolean isTracking = aiController.isTracking();
                     lock.readLock().lock();
                     try {
@@ -156,6 +156,7 @@ public class App
                         {
                             currentFitness +=  -(.1 * FITNESS_INCREMENT);
                             neuralNet.train(0, predicted);
+                            neuralNet.forward();
                             aiPredict = neuralNet.predict();
                         }
                         aiController.getExternalPrediction(aiPredict);
@@ -177,7 +178,7 @@ public class App
         }
     }
         
-    private static boolean isBound(double[] gameState) 
+    private static boolean isNotBound(double[] gameState) 
     {
         double x = gameState[1]; // Snake's X position
         double y = gameState[2]; // Snake's Y position
@@ -305,21 +306,21 @@ public class App
     }
 
 
-    private static void adaptiveMutation(NeuralNet neuralNet) 
-    {
+    // private static void adaptiveMutation(NeuralNet neuralNet) 
+    // {
        
-        double mutationRate =  Math.exp(-Math.abs(neuralNet.getFitness()) / 50.0);; 
+    //     double mutationRate =  Math.exp(-Math.abs(neuralNet.getFitness()) / 50.0);; 
 
-        int mutationAttempts = (int) (MUTATION_INTERVAL * (1 + Math.abs(neuralNet.getFitness()) / 100.0));
+    //     int mutationAttempts = (int) (MUTATION_INTERVAL * (1 + Math.abs(neuralNet.getFitness()) / 100.0));
 
-        for (int i = 0; i < mutationAttempts; ++i) 
-        {
-            if (rand.nextDouble() < mutationRate) 
-            {
-                neuralNet.mutate();
-            }
-        }
-    }
+    //     for (int i = 0; i < mutationAttempts; ++i) 
+    //     {
+    //         if (rand.nextDouble() < mutationRate) 
+    //         {
+    //             neuralNet.mutate();
+    //         }
+    //     }
+    // }
 
     private static double[] getBestMove(double[] gameState) 
     {
@@ -333,28 +334,27 @@ public class App
         double appleX = gameState[3];
         double appleY = gameState[4];
         // Define possible moves
-        int[] moves = {0, 1, 2, 3}; // {Up, Down, Left, Right}
+         
         double[][] moveOffsets = {
-            {0, -25}, // Up
-            {0, 25},  // Down
             {-25, 0}, // Left
-            {25, 0}   // Right
+            {0, -25}, // Up
+            {25, 0},   // Right
+            {0, 25}  // Down
         };
 
-        for (int i = 0; i < moves.length; i++) 
+        for (int i = 0; i < 4; i++) // {Up, Down, Left, Right}
         {
             double newX = snakeX + moveOffsets[i][0];
             double newY = snakeY + moveOffsets[i][1];
 
             // Skip the move if it goes out of bounds or into the snake body
-            if (!isBound(gameState) ) 
+            if (isNotBound(gameState) ) 
             {
                 continue;
             }
 
             // Compute Euclidean distance to the apple
             double distance = computeEuclideanDistance(newX, newY, appleX, appleY);
-
             // Choose move that minimizes distance
             if (distance < minDistance) 
             {
@@ -372,6 +372,18 @@ public class App
         return bestMove; // Return as double[]
     }
  
+    private static int argMax(double[] arr) 
+    {
+        int maxIndex = 0;
+        for (int i = 1; i < arr.length; i++) 
+        {
+            if (Double.compare(arr[i],arr[maxIndex]) == 1) 
+            {
+                maxIndex = i;
+            }
+        }
+        return maxIndex;
+    }
 
     private static double computeEuclideanDistance(double x1, double y1, double x2, double y2) 
     {
@@ -382,11 +394,7 @@ public class App
     {
         if(r1.length != r2.length)
             return false;
-        for(int i = 0;i < r1.length;++i)
-        {
-            if (r1[i] != r2[i])
-                return false;
-        }   
-            return true;
+        return argMax(r1) == argMax(r2);
     }
+
 }

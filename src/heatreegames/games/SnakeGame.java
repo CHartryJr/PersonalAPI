@@ -7,7 +7,6 @@ import heatreegames.controllers.ExternalInputAdapter;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Random;
-
 import javax.swing.Timer;
 
 public class SnakeGame extends GameScene 
@@ -248,7 +247,7 @@ public class SnakeGame extends GameScene
     }
 
     @Override
-    public double[] getEnviroment() 
+    protected double[] getEnviroment() 
     {
         Double curDirect = dir == 'L'? 37d : 
                         dir == 'U'? 38d: 

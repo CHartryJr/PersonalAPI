@@ -60,7 +60,7 @@ public class ExternalInputAdapter extends KeyAdapter
         }
     }
 
-    private int predictMove() 
+    private int predictMove() // 37 left ,38 up ,39 right, 40 down
     {
         lock.writeLock().lock();
         try 
@@ -116,6 +116,6 @@ public class ExternalInputAdapter extends KeyAdapter
                       nextMove == 39 ? "right":
                       nextMove == 40 ? "Down" : "Unkown";
         System.out.print(String.format("\r Current Model Movement %s  Mapping{%f ,%f}  predictions{%f,%f,%f,%f} Model Tracking %b"
-        ,move,env[1],env[3],prediction[0],prediction[1] ,prediction[2],prediction[3],isTracking));
+        ,move,env[1],env[2],prediction[0],prediction[1] ,prediction[2],prediction[3],isTracking));
     }
 }
