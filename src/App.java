@@ -117,7 +117,7 @@ public class App
                             try 
                             {
                                 neuralNet.setFitness((neuralNet.getFitness() * 0.95 + currentFitness));
-                                adaptiveMutation(neuralNet);
+                               // adaptiveMutation(neuralNet);
                             } 
                             finally 
                             {
@@ -347,7 +347,7 @@ public class App
             double newY = snakeY + moveOffsets[i][1];
 
             // Skip the move if it goes out of bounds or into the snake body
-            if (isBound(gameState) ) 
+            if (!isBound(gameState) ) 
             {
                 continue;
             }
