@@ -146,7 +146,18 @@ public class App
                     try {
                         neuralNet.observe(gameState);
                         neuralNet.forward();
-                        double [] aiPredict = exploration(neuralNet);
+                        double [] aiPredict = neuralNet.predict(),predicted = getBestMove(gameState);
+
+                        if(compareResults(aiPredict,predicted))
+                        {
+                            currentFitness += (.06666667 * FITNESS_INCREMENT);
+                        }
+                        else
+                        {
+                            currentFitness +=  -(.1 * FITNESS_INCREMENT);
+                            neuralNet.train(0, predicted);
+                            aiPredict = neuralNet.predict();
+                        }
                         aiController.getExternalPrediction(aiPredict);
                         //System.out.print(String.format("\r %s", neuralNet));
                     } 
@@ -165,23 +176,7 @@ public class App
             sleepThread(THREAD_SLEEP_DURATION);
         }
     }
-
-    private static double[] exploration (NeuralNet net)
-    {
-        if(net.getFitness() > 1 )
-            return net.predict();
-
         
-        if (rand.nextDouble() < 0.1) // 10% chance to explore
-        {
-            return new double[] { rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), rand.nextDouble() };
-        } 
-        else 
-        {
-            return net.predict();
-        }
-    }
-                    
     private static boolean isBound(double[] gameState) 
     {
         double x = gameState[1]; // Snake's X position
@@ -326,5 +321,72 @@ public class App
         }
     }
 
-   
+    private static double[] getBestMove(double[] gameState) 
+    {
+        double[] bestMove = {0, 0, 0, 0}; // [Up, Down, Left, Right]
+        double minDistance = Double.MAX_VALUE;
+        int bestDirection = -1;
+
+        // Extract information from gameState
+        double snakeX = gameState[1];
+        double snakeY = gameState[2];
+        double appleX = gameState[3];
+        double appleY = gameState[4];
+        // Define possible moves
+        int[] moves = {0, 1, 2, 3}; // {Up, Down, Left, Right}
+        double[][] moveOffsets = {
+            {0, -25}, // Up
+            {0, 25},  // Down
+            {-25, 0}, // Left
+            {25, 0}   // Right
+        };
+
+        for (int i = 0; i < moves.length; i++) 
+        {
+            double newX = snakeX + moveOffsets[i][0];
+            double newY = snakeY + moveOffsets[i][1];
+
+            // Skip the move if it goes out of bounds or into the snake body
+            if (isBound(gameState) ) 
+            {
+                continue;
+            }
+
+            // Compute Euclidean distance to the apple
+            double distance = computeEuclideanDistance(newX, newY, appleX, appleY);
+
+            // Choose move that minimizes distance
+            if (distance < minDistance) 
+            {
+                minDistance = distance;
+                bestDirection = i;
+            }
+        }
+
+    // Assign 1.0 probability to the best move, 0.0 to others
+        if (bestDirection != -1) 
+        {
+            bestMove[bestDirection] = 1.0;
+        }
+
+        return bestMove; // Return as double[]
+    }
+ 
+
+    private static double computeEuclideanDistance(double x1, double y1, double x2, double y2) 
+    {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    private static boolean compareResults(double[] r1,double []r2)
+    {
+        if(r1.length != r2.length)
+            return false;
+        for(int i = 0;i < r1.length;++i)
+        {
+            if (r1[i] != r2[i])
+                return false;
+        }   
+            return true;
+    }
 }
