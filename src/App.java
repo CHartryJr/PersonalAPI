@@ -32,8 +32,8 @@ public class App
             GameFrame gameFrame = new GameFrame();
             gameFrame.start();
 
-            Thread trainerThread = new Thread(() -> trainSnakeAI(gameFrame, currentWorkingDirectory));
-            trainerThread.start();
+            //Thread trainerThread = new Thread(() -> trainSnakeAI(gameFrame, currentWorkingDirectory));
+           // trainerThread.start();
         });
     }
 
