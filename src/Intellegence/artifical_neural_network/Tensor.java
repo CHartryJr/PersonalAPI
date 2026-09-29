@@ -1,13 +1,58 @@
 package Intellegence.artifical_neural_network;
 
+import java.util.Arrays;
+import java.util.Random;
+
 abstract class Tensor implements Layer
 {
-    double[] weights;
-    double[] biases;
-    int numberOfNeurons;
-    int numberofWeightsPerNeuron;
-    Activation activation;
+    private double[] weights;
+    private double[] biases;
+    private int numberOfNeurons;
+    private int numberofWeightsPerNeuron;
+    private Activation activation;
     
+    public Tensor(int numberOfNeurons, int numberofWeightsPerNeuron, Activation activation)
+    {
+        this.numberOfNeurons = numberOfNeurons;
+        this.numberofWeightsPerNeuron = numberofWeightsPerNeuron;
+        this.activation = activation;
+        this.weights = Arrays.stream(new double[numberOfNeurons * numberofWeightsPerNeuron]).map(i -> (Math.random()*2) - 1).toArray();
+        this.biases = Arrays.stream(new double[numberOfNeurons]).map(i -> (Math.random()*2) - 1).toArray();
+    }
+
+    public double[] getWeights() {
+        return weights;
+    }
+
+    public void setWeights(double[] weights) {
+        this.weights = weights;
+    }
+
+    public double[] getBiases() {
+        return biases;
+    }
+
+    public void setBiases(double[] biases) {
+        this.biases = biases;
+    }
+
+    public int getNumberOfNeurons() {
+        return numberOfNeurons;
+    }
+
+
+    public int getNumberofWeightsPerNeuron() {
+        return numberofWeightsPerNeuron;
+    }
+
+    public Activation getActivation() {
+        return activation;
+    }
+
+    public void setActivation(Activation activation) {
+        this.activation = activation;
+    }
+
     @Override
     public double[] forward(double[] input)
     {
@@ -72,4 +117,5 @@ abstract class Tensor implements Layer
 
         return sb.toString();
     }
+
 }
