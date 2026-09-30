@@ -1,24 +1,31 @@
 package Intellegence.artifical_neural_network;
-
 import java.util.Arrays;
-import java.util.Random;
 
 abstract class Tensor implements Layer
 {
+    private Tensor nextLayer,previousLayer;
+    private Activation activation;
+    private ErrorCalculation errorCalculation;
     private double[] weights;
     private double[] biases;
+    private double learningRate;
     private int numberOfNeurons;
     private int numberofWeightsPerNeuron;
-    private Activation activation;
+   
     
     public Tensor(int numberOfNeurons, int numberofWeightsPerNeuron, Activation activation)
     {
         this.numberOfNeurons = numberOfNeurons;
         this.numberofWeightsPerNeuron = numberofWeightsPerNeuron;
         this.activation = activation;
+        this.errorCalculation = ErrorCalculation.SQUARED_ERROR; // Default error calculation method
         this.weights = Arrays.stream(new double[numberOfNeurons * numberofWeightsPerNeuron]).map(i -> (Math.random()*2) - 1).toArray();
         this.biases = Arrays.stream(new double[numberOfNeurons]).map(i -> (Math.random()*2) - 1).toArray();
+        this.learningRate = 0.01; // Default learning rate
     }
+
+    abstract void setPreviousLayer(Tensor previousLayer);
+    abstract void setNextLayer(Tensor nextLayer);
 
     public double[] getWeights() {
         return weights;
@@ -45,12 +52,58 @@ abstract class Tensor implements Layer
         return numberofWeightsPerNeuron;
     }
 
+    public ErrorCalculation getErrorCalculation() {
+        return errorCalculation;
+    }
+
+    public void setErrorCalculation(ErrorCalculation errorCalculation) {
+        this.errorCalculation = errorCalculation;
+    }
+
+    public double getLearningRate() {
+        return learningRate;
+    }
+
+    public void setLearningRate(double learningRate) {
+        this.learningRate = learningRate;
+    }
+
     public Activation getActivation() {
         return activation;
     }
 
-    public void setActivation(Activation activation) {
+    public void setActivation(Activation activation) 
+    {
         this.activation = activation;
+    }
+
+
+    public void insertLayer(Tensor nextLayer, Tensor previousLayer)
+    {
+        this.nextLayer = nextLayer;
+        this.previousLayer = previousLayer;
+    }
+
+    public void appendLayer(Tensor nextLayer)
+    {
+        this.nextLayer = nextLayer;
+    }
+
+    public Tensor getNextLayer() {
+        return nextLayer;
+    }
+
+    public Tensor getPreviousLayer() {
+        return previousLayer;
+    }
+
+    public Tensor removeLayer()
+    {
+        this.nextLayer.previousLayer = this.previousLayer;
+        this.previousLayer.nextLayer = this.nextLayer;
+        this.nextLayer = null;
+        this.previousLayer = null;
+        return this;
     }
 
     @Override
@@ -73,7 +126,7 @@ abstract class Tensor implements Layer
     public double[] backward(double[] outputGradient)
     {
         double[] inputGradient = new double[numberofWeightsPerNeuron];
-        for (int i = 0; i < numberOfNeurons; i++)
+        for (int i = 0; i < numberOfNeurons; ++i)
         {
             double derivative = activation.derive(outputGradient[i]);
             for (int j = 0; j < numberofWeightsPerNeuron; j++)
