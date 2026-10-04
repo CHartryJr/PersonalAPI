@@ -6,8 +6,8 @@ abstract class Tensor implements Layer
     private Tensor nextLayer,previousLayer;
     private Activation activation;
     private ErrorCalculation errorCalculation;
-    private double[] weights;
-    private double[] biases;
+    private double[] weights,biases,input,output;
+
     private double learningRate;
     private int numberOfNeurons;
     private int numberofWeightsPerNeuron;
@@ -27,48 +27,59 @@ abstract class Tensor implements Layer
     abstract void setPreviousLayer(Tensor previousLayer);
     abstract void setNextLayer(Tensor nextLayer);
 
-    public double[] getWeights() {
+    public double[] getWeights() 
+    {
         return weights;
     }
 
-    public void setWeights(double[] weights) {
+    public void setWeights(double[] weights) 
+    {
         this.weights = weights;
     }
 
-    public double[] getBiases() {
+    public double[] getBiases() 
+    {
         return biases;
     }
 
-    public void setBiases(double[] biases) {
+    public void setBiases(double[] biases) 
+    {
         this.biases = biases;
     }
 
-    public int getNumberOfNeurons() {
+    public int getNumberOfNeurons() 
+    {
         return numberOfNeurons;
     }
 
 
-    public int getNumberofWeightsPerNeuron() {
+    public int getNumberofWeightsPerNeuron() 
+    {
         return numberofWeightsPerNeuron;
     }
 
-    public ErrorCalculation getErrorCalculation() {
+    public ErrorCalculation getErrorCalculation() 
+    {
         return errorCalculation;
     }
 
-    public void setErrorCalculation(ErrorCalculation errorCalculation) {
+    public void setErrorCalculation(ErrorCalculation errorCalculation) 
+    {
         this.errorCalculation = errorCalculation;
     }
 
-    public double getLearningRate() {
+    public double getLearningRate() 
+    {
         return learningRate;
     }
 
-    public void setLearningRate(double learningRate) {
+    public void setLearningRate(double learningRate) 
+    {
         this.learningRate = learningRate;
     }
 
-    public Activation getActivation() {
+    public Activation getActivation() 
+    {
         return activation;
     }
 
@@ -89,11 +100,13 @@ abstract class Tensor implements Layer
         this.nextLayer = nextLayer;
     }
 
-    public Tensor getNextLayer() {
+    public Tensor getNextLayer() 
+    {
         return nextLayer;
     }
 
-    public Tensor getPreviousLayer() {
+    public Tensor getPreviousLayer() 
+    {
         return previousLayer;
     }
 
@@ -107,8 +120,10 @@ abstract class Tensor implements Layer
     }
 
     @Override
-    public double[] forward(double[] input)
+    public double[] forward(Tensor Layer)
     {
+
+        this.input = Layer.getOutput();
         double[] output = new double[numberOfNeurons];
         for (int i = 0; i < numberOfNeurons; i++)
         {
@@ -119,22 +134,22 @@ abstract class Tensor implements Layer
             }
             output[i] = activation.apply(sum);
         }
+        this.output = output;
         return output;
     }
 
     @Override
     public double[] backward(double[] outputGradient)
     {
-        double[] inputGradient = new double[numberofWeightsPerNeuron];
-        for (int i = 0; i < numberOfNeurons; ++i)
+        double[] delta = new double[outputGradient.length];
+        for (int i = 0; i < outputGradient.length; ++i)
         {
-            double derivative = activation.derive(outputGradient[i]);
-            for (int j = 0; j < numberofWeightsPerNeuron; j++)
-            {
-                inputGradient[j] += weights[i * numberofWeightsPerNeuron + j] * derivative;
-            }
+            delta[i] = TensorOperation.MULTIPLICATION.apply(outputGradient[i], activation.derive(output[i]));
         }
-        return inputGradient;
+
+
+
+        return delta;
     }
 
     public String getShape()

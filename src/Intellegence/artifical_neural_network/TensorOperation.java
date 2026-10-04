@@ -22,6 +22,16 @@ enum TensorOperation
         }
     } ,   
     
+    MULTIPLICATION
+    {
+        @Override
+        double[] apply(double[] matrixA, double[] matrixB) 
+        {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'apply'");
+        }
+    } , 
+    
     DOT_PRODUCT
     {
         @Override
