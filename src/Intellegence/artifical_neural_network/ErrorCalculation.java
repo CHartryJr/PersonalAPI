@@ -31,7 +31,6 @@ public enum ErrorCalculation
 
     MEAN_SQUARED_ERROR
     {
-
         @Override
         double[] calculateError(double[] predicted, double[] actual) 
         {
@@ -53,7 +52,6 @@ public enum ErrorCalculation
             }
             return gradient;
         }
-
     };
 
     abstract double[] calculateError(double[] predicted, double[] actual);

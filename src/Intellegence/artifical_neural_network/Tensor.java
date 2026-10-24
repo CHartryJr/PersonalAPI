@@ -3,36 +3,33 @@ import java.util.Arrays;
 
 abstract class Tensor implements Layer
 {
-    private Tensor nextLayer,previousLayer;
     private Activation activation;
-    private ErrorCalculation errorCalculation;
-    private double[] weights,biases,input,output;
-
+    private double[] weights,biases,input,output,delta;
     private double learningRate;
-    private int numberOfNeurons;
-    private int numberofWeightsPerNeuron;
+    private int numberOfNeurons, numberOfWeightsPerNeuron;// row x colums
+    private int  layerSize;
+    private boolean verbose;
    
-    
     public Tensor(int numberOfNeurons, int numberofWeightsPerNeuron, Activation activation)
     {
         this.numberOfNeurons = numberOfNeurons;
-        this.numberofWeightsPerNeuron = numberofWeightsPerNeuron;
+        this.numberOfWeightsPerNeuron = numberofWeightsPerNeuron;
         this.activation = activation;
-        this.errorCalculation = ErrorCalculation.SQUARED_ERROR; // Default error calculation method
         this.weights = Arrays.stream(new double[numberOfNeurons * numberofWeightsPerNeuron]).map(i -> (Math.random()*2) - 1).toArray();
         this.biases = Arrays.stream(new double[numberOfNeurons]).map(i -> (Math.random()*2) - 1).toArray();
-        this.learningRate = 0.01; // Default learning rate
+        this.learningRate = 0.001; // Default learning rate
+        this.layerSize = numberOfNeurons * numberofWeightsPerNeuron;
+        this.output = new double[numberOfNeurons];
+        this.delta = new double[numberOfNeurons];
+        this.verbose = false; // Default verbosity
     }
-
-    abstract void setPreviousLayer(Tensor previousLayer);
-    abstract void setNextLayer(Tensor nextLayer);
 
     public double[] getWeights() 
     {
         return weights;
     }
 
-    public void setWeights(double[] weights) 
+    protected void setWeights(double[] weights) 
     {
         this.weights = weights;
     }
@@ -42,7 +39,7 @@ abstract class Tensor implements Layer
         return biases;
     }
 
-    public void setBiases(double[] biases) 
+    protected void setBiases(double[] biases) 
     {
         this.biases = biases;
     }
@@ -53,19 +50,9 @@ abstract class Tensor implements Layer
     }
 
 
-    public int getNumberofWeightsPerNeuron() 
+    public int getNumberOfWeightsPerNeuron() 
     {
-        return numberofWeightsPerNeuron;
-    }
-
-    public ErrorCalculation getErrorCalculation() 
-    {
-        return errorCalculation;
-    }
-
-    public void setErrorCalculation(ErrorCalculation errorCalculation) 
-    {
-        this.errorCalculation = errorCalculation;
+        return numberOfWeightsPerNeuron;
     }
 
     public double getLearningRate() 
@@ -73,9 +60,18 @@ abstract class Tensor implements Layer
         return learningRate;
     }
 
-    public void setLearningRate(double learningRate) 
+    protected void setLearningRate(double learningRate) 
     {
         this.learningRate = learningRate;
+    }
+
+    public double[] getDelta() {
+        return delta;
+    }
+
+    protected void setDelta(double[] delta) 
+    {
+        this.delta = delta;
     }
 
     public Activation getActivation() 
@@ -88,73 +84,118 @@ abstract class Tensor implements Layer
         this.activation = activation;
     }
 
-
-    public void insertLayer(Tensor nextLayer, Tensor previousLayer)
-    {
-        this.nextLayer = nextLayer;
-        this.previousLayer = previousLayer;
-    }
-
-    public void appendLayer(Tensor nextLayer)
-    {
-        this.nextLayer = nextLayer;
-    }
-
-    public Tensor getNextLayer() 
-    {
-        return nextLayer;
-    }
-
-    public Tensor getPreviousLayer() 
-    {
-        return previousLayer;
-    }
-
-    public Tensor removeLayer()
-    {
-        this.nextLayer.previousLayer = this.previousLayer;
-        this.previousLayer.nextLayer = this.nextLayer;
-        this.nextLayer = null;
-        this.previousLayer = null;
-        return this;
-    }
-
     @Override
+    public double [] forward(double[] input) 
+    {
+        isValidInput(input);
+        this.input = input;
+        double[] sums = biases.clone();
+        int weightsPerNeuron = numberOfWeightsPerNeuron;
+
+        for (int k = 0; k < layerSize; ++k) 
+        {
+            int neuron = k / weightsPerNeuron;
+            int inputIndex = k % weightsPerNeuron;
+
+            sums[neuron] += weights[k] * input[inputIndex];
+
+            if (inputIndex == weightsPerNeuron - 1) 
+            {
+                output[neuron] = activation.apply(sums[neuron]);
+            }
+        }
+        return output;
+    }
+
     public double[] forward(Tensor Layer)
     {
-
+        isValidInput(Layer.getOutput());
         this.input = Layer.getOutput();
-        double[] output = new double[numberOfNeurons];
-        for (int i = 0; i < numberOfNeurons; i++)
+        double[] sums = biases.clone();
+        int weightsPerNeuron = numberOfWeightsPerNeuron;
+
+        for (int k = 0; k < layerSize; ++k) 
         {
-            double sum = biases[i];
-            for (int j = 0; j < numberofWeightsPerNeuron; j++)
+            int neuron = k / weightsPerNeuron;
+            int inputIndex = k % weightsPerNeuron;
+
+            sums[neuron] += weights[k] * input[inputIndex];
+
+            if (inputIndex == weightsPerNeuron - 1) 
             {
-                sum += weights[i * numberofWeightsPerNeuron + j] * input[j];
+                output[neuron] = activation.apply(sums[neuron]);
             }
-            output[i] = activation.apply(sum);
         }
-        this.output = output;
+        return output;
+    }
+
+    public double[] getInput() 
+    {
+        return input;
+    }
+
+    private double[] getOutput() 
+    {
         return output;
     }
 
     @Override
-    public double[] backward(double[] outputGradient)
+    public double[] backward(double[] outputGradient) 
     {
-        double[] delta = new double[outputGradient.length];
-        for (int i = 0; i < outputGradient.length; ++i)
+        double[] deltaIn = new double[numberOfWeightsPerNeuron];
+
+        for (int k = 0; k < layerSize; ++k) 
         {
-            delta[i] = TensorOperation.MULTIPLICATION.apply(outputGradient[i], activation.derive(output[i]));
+            int neuron = k / numberOfWeightsPerNeuron;
+            int inputIndex = k % numberOfWeightsPerNeuron;
+
+            // Propagate gradient to the previous layer
+            deltaIn[inputIndex] += weights[k] * activation.derive(outputGradient[neuron]);
+
+            // Update each weight once
+            weights[k] -= learningRate * outputGradient[neuron] * input[inputIndex];
+
+            // Update each bias once, on this neuron's last input
+            if (inputIndex == numberOfWeightsPerNeuron - 1) 
+            {
+                biases[neuron] -= learningRate * outputGradient[neuron];
+            }
         }
 
-
-
-        return delta;
+        this.delta = deltaIn.clone();
+        return deltaIn;
     }
+
+    public double[] backward(Tensor layer) 
+    {
+
+        double[] deltaIn = new double[numberOfWeightsPerNeuron],outputGradient = layer.getDelta();
+
+        for (int k = 0; k < layerSize; ++k) 
+        {
+            int neuron = k / numberOfWeightsPerNeuron;
+            int inputIndex = k % numberOfWeightsPerNeuron;
+
+            // Propagate gradient to the previous layer
+            deltaIn[inputIndex] += weights[k] * activation.derive(outputGradient[neuron]);
+
+            // Update each weight once
+            weights[k] -= learningRate * outputGradient[neuron] * input[inputIndex];
+
+            // Update each bias once, on this neuron's last input
+            if (inputIndex == numberOfWeightsPerNeuron - 1) 
+            {
+                biases[neuron] -= learningRate * outputGradient[neuron];
+            }
+        }
+
+        this.delta = deltaIn.clone();
+        return deltaIn;
+    }  
 
     public String getShape()
     {
-        return String.format("[%d,%d]", numberOfNeurons, numberofWeightsPerNeuron);
+        return String.format("[%d,%d]", numberOfNeurons, numberOfWeightsPerNeuron);
     }
 
     @Override
@@ -163,27 +204,44 @@ abstract class Tensor implements Layer
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("Activation: %s\n", this, activation.toString()));
         sb.append(String.format("Shape: %s\n", getShape()));
-        
-        sb.append("Weights: ");
-        for (int i = 0; i < weights.length; ++i)
+        if(verbose)
         {
-            if(i % numberofWeightsPerNeuron == 0)
-                sb.append("[ ");
-            
-            sb.append(weights[i]).append(" ");
+            sb.append("Weights: ");
+            for (int i = 0; i < weights.length; ++i)
+            {
+                if(i % numberOfWeightsPerNeuron == 0)
+                    sb.append("[ ");
+                
+                sb.append(weights[i]).append(" ");
 
-            if(weights.length - 1 == i || (i + 1) % numberofWeightsPerNeuron == 0)
-                sb.append(" ] ");
-        }
+                if(weights.length - 1 == i || (i + 1) % numberOfWeightsPerNeuron == 0)
+                    sb.append(" ] ");
+            }
 
-        sb.append("\nBiases:[");
-        for (double bias : biases)
-        {
-            sb.append(bias).append(" ");
+            sb.append("\nBiases:[");
+            for (double bias : biases)
+            {
+                sb.append(bias).append(" ");
+            }
         }
         sb.append("]\n");
-
         return sb.toString();
+    }
+
+    private boolean isValidInput(double[] input)
+    {
+        boolean isValid = false;
+
+        if (input.length == numberOfWeightsPerNeuron)
+        {
+            isValid = true;
+        }
+        else
+        {
+            System.err.printf("Invalid input length: expected %d, got %d\n", numberOfWeightsPerNeuron, input.length);
+        }
+
+        return isValid;
     }
 
 }
