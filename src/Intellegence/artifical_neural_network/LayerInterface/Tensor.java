@@ -1,4 +1,4 @@
-package Intellegence.artifical_neural_network;
+package Intellegence.artifical_neural_network.LayerInterface;
 import java.util.Arrays;
 
 abstract class Tensor implements Layer
@@ -49,7 +49,6 @@ abstract class Tensor implements Layer
         return numberOfNeurons;
     }
 
-
     public int getNumberOfWeightsPerNeuron() 
     {
         return numberOfWeightsPerNeuron;
@@ -82,6 +81,21 @@ abstract class Tensor implements Layer
     public void setActivation(Activation activation) 
     {
         this.activation = activation;
+    }
+
+     public double[] getInput() 
+    {
+        return input;
+    }
+
+    private double[] getOutput() 
+    {
+        return output;
+    }
+
+    public String getShape()
+    {
+        return String.format("[%d,%d]", numberOfNeurons, numberOfWeightsPerNeuron);
     }
 
     @Override
@@ -129,16 +143,6 @@ abstract class Tensor implements Layer
         return output;
     }
 
-    public double[] getInput() 
-    {
-        return input;
-    }
-
-    private double[] getOutput() 
-    {
-        return output;
-    }
-
     @Override
     public double[] backward(double[] outputGradient) 
     {
@@ -180,24 +184,19 @@ abstract class Tensor implements Layer
             deltaIn[inputIndex] += weights[k] * activation.derive(outputGradient[neuron]);
 
             // Update each weight once
-            weights[k] -= learningRate * outputGradient[neuron] * input[inputIndex];
+            weights[k] -= learningRate * activation.derive(outputGradient[neuron]) * input[inputIndex];
 
             // Update each bias once, on this neuron's last input
             if (inputIndex == numberOfWeightsPerNeuron - 1) 
             {
-                biases[neuron] -= learningRate * outputGradient[neuron];
+                biases[neuron] -= learningRate * activation.derive(outputGradient[neuron]);
             }
         }
 
         this.delta = deltaIn.clone();
         return deltaIn;
     }  
-
-    public String getShape()
-    {
-        return String.format("[%d,%d]", numberOfNeurons, numberOfWeightsPerNeuron);
-    }
-
+ 
     @Override
     public String toString()
     {
@@ -223,8 +222,16 @@ abstract class Tensor implements Layer
             {
                 sb.append(bias).append(" ");
             }
+            sb.append("]\n");
+
+            sb.append("Output:[");
+            for (double out : output)
+            {
+                sb.append(out).append(" "); 
+            }
+            sb.append("]\n");
         }
-        sb.append("]\n");
+        
         return sb.toString();
     }
 

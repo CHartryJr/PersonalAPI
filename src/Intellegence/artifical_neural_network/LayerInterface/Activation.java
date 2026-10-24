@@ -1,4 +1,4 @@
-package Intellegence.artifical_neural_network;
+package Intellegence.artifical_neural_network.LayerInterface;
 
 /**
  * Enum representing various activation functions used in neural networks.
