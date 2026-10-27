@@ -1,7 +1,8 @@
 package Intellegence.artifical_neural_network.ModelInterface;
 
-public interface Model 
+import Intellegence.predictiiveInterface.Predictor;
+
+public abstract class Model implements Predictor
 {
-    double[] predict(double[] input);
-    double[] train(double[] input, double[] expectedOutput);
+   
 }

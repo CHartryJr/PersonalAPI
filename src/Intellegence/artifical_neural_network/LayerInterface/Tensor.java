@@ -1,7 +1,7 @@
 package Intellegence.artifical_neural_network.LayerInterface;
 import java.util.Arrays;
 
-abstract class Tensor implements Layer
+public abstract class Tensor implements Layer
 {
     private Activation activation;
     private double[] weights,biases,input,output,delta;
@@ -88,7 +88,7 @@ abstract class Tensor implements Layer
         return input;
     }
 
-    private double[] getOutput() 
+    public double[] getOutput() 
     {
         return output;
     }

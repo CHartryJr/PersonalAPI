@@ -1,4 +1,4 @@
-package Intellegence.artifical_neural_network.LayerInterface;
+package Intellegence.artifical_neural_network.Model;
 
 public enum ErrorCalculation 
 {
