@@ -1,28 +1,28 @@
-package Intellegence.artifical_neural_network.Model;
+package Intellegence.artifical_neural_network.Utilities;
 
 public enum ErrorCalculation 
 {
-    SQUARED_ERROR
+    MEAN_ABSOLUTE_ERROR
     {
 
         @Override
-        double[] calculateError(double[] predicted, double[] actual) 
+        public double[] calculateError(double[] predicted, double[] actual) 
         {
             double[] error = new double[predicted.length];
             for(int i = 0; i < predicted.length; i++)
             {
-                error[i] = Math.pow(predicted[i] - actual[i], 2);
+                error[i] = Math.abs(predicted[i] - actual[i]);
             }
             return error;
         }
 
         @Override
-        double[] gradient(double[] predicted, double[] actual) 
+        public double[] gradient(double[] predicted, double[] actual) 
         {
             double[] gradient = new double[predicted.length];
             for(int i = 0; i < predicted.length; i++)
             {
-                gradient[i] = 2 * (predicted[i] - actual[i]);
+                gradient[i] = (predicted[i] > actual[i]) ? 1 : -1;
             }
             return gradient;
         }
@@ -32,28 +32,28 @@ public enum ErrorCalculation
     MEAN_SQUARED_ERROR
     {
         @Override
-        double[] calculateError(double[] predicted, double[] actual) 
+        public double[] calculateError(double[] predicted, double[] actual) 
         {
             double[] error = new double[predicted.length];
             for(int i = 0; i < predicted.length; i++)
             {
-                error[i] = Math.pow(predicted[i] - actual[i], 2);
+                error[i] = Math.pow(predicted[i] - actual[i], 2)/predicted.length;
             }
             return error;
         }
 
         @Override
-        double[] gradient(double[] predicted, double[] actual) 
+        public double[] gradient(double[] predicted, double[] actual) 
         {
             double[] gradient = new double[predicted.length];
             for(int i = 0; i < predicted.length; i++)
             {
-                gradient[i] = -2 * (predicted[i] - actual[i]) / predicted.length;
+                gradient[i] = 2 * (predicted[i] - actual[i]) / predicted.length;
             }
             return gradient;
         }
     };
 
-    abstract double[] calculateError(double[] predicted, double[] actual);
-    abstract double[] gradient(double[] predicted, double[] actual);
+    public abstract double[] calculateError(double[] predicted, double[] actual);
+    public abstract double[] gradient(double[] predicted, double[] actual);
 }

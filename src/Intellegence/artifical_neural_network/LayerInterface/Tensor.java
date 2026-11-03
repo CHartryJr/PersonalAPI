@@ -1,9 +1,12 @@
 package Intellegence.artifical_neural_network.LayerInterface;
 import java.util.Arrays;
+import Intellegence.artifical_neural_network.Utilities.Activation;
+import Intellegence.artifical_neural_network.Utilities.PredictionType;
 
-public abstract class Tensor implements Layer
+public abstract class Tensor implements Layer, Cloneable
 {
     private Activation activation;
+
     private double[] weights,biases,input,output,delta;
     private double learningRate;
     private int numberOfNeurons, numberOfWeightsPerNeuron;// row x colums
@@ -83,6 +86,7 @@ public abstract class Tensor implements Layer
         this.activation = activation;
     }
 
+
      public double[] getInput() 
     {
         return input;
@@ -157,12 +161,12 @@ public abstract class Tensor implements Layer
             deltaIn[inputIndex] += weights[k] * activation.derive(outputGradient[neuron]);
 
             // Update each weight once
-            weights[k] -= learningRate * outputGradient[neuron] * input[inputIndex];
+            weights[k] -= learningRate * activation.derive(outputGradient[neuron]) * input[inputIndex];
 
             // Update each bias once, on this neuron's last input
             if (inputIndex == numberOfWeightsPerNeuron - 1) 
             {
-                biases[neuron] -= learningRate * outputGradient[neuron];
+                biases[neuron] -= learningRate * activation.derive(outputGradient[neuron]);
             }
         }
 
@@ -233,6 +237,25 @@ public abstract class Tensor implements Layer
         }
         
         return sb.toString();
+    }
+
+    @Override 
+    public Tensor clone() 
+    {
+        try 
+        {
+            Tensor cloned = (Tensor) super.clone();
+            cloned.weights = weights.clone();
+            cloned.biases = biases.clone();
+            cloned.input = input.clone();
+            cloned.output = output.clone();
+            cloned.delta = delta.clone();
+            return cloned;
+        } 
+        catch (CloneNotSupportedException e) 
+        {
+            throw new AssertionError("Cloning not supported", e);
+        }
     }
 
     private boolean isValidInput(double[] input)

@@ -1,4 +1,4 @@
-package Intellegence.artifical_neural_network.LayerInterface;
+package Intellegence.artifical_neural_network.Utilities;
 
 /**
  * Enum representing various activation functions used in neural networks.
@@ -15,7 +15,7 @@ public enum Activation
     SIGMOID
     {
         @Override
-        double apply(double value) 
+        public double apply(double value) 
         {
             if (!Double.isFinite(value)) return 0; // Handle NaN or Infinity
             value = Math.max(-500, Math.min(500, value)); // Clamp input to prevent overflow
@@ -23,7 +23,7 @@ public enum Activation
         }
 
         @Override
-        double derive(double value) 
+        public double derive(double value) 
         {
             double sigmoidValue = 1 / (1 + Math.exp(-value)); // Compute sigmoid output
             return sigmoidValue * (1 - sigmoidValue);  // Compute derivative of sigmoid
@@ -38,7 +38,7 @@ public enum Activation
     HYPER_TANGENT
     {
         @Override
-        double apply(double value) 
+        public double apply(double value) 
         {
             if (!Double.isFinite(value)) return 0; // Handle NaN or Infinity
             value = Math.max(-500, Math.min(500, value)); // Clamp input to prevent overflow
@@ -46,7 +46,7 @@ public enum Activation
         }
 
         @Override
-        double derive(double value) 
+        public double derive(double value) 
         {
             double tanhValue = Math.tanh(value); // Compute tanh value
             return 1 - tanhValue * tanhValue; // Compute derivative of tanh
@@ -61,7 +61,7 @@ public enum Activation
     HAILSTONE
     {
         @Override
-        double apply(double value) 
+        public double apply(double value) 
         {
             if (!Double.isFinite(value)) return 1; // Handle NaN or Infinity
             value = Math.floor(value);
@@ -71,7 +71,7 @@ public enum Activation
         }
 
         @Override
-        double derive(double value) 
+        public double derive(double value) 
         {
             value = Math.floor(value);
             if (value <= 1)
@@ -88,13 +88,13 @@ public enum Activation
     RECTIFIED_LINEAR_UNIT
     {
         @Override
-        double apply(double value) 
+        public double apply(double value) 
         {
             return value > 0 ? value : 0.0d; // ReLU function
         }
 
         @Override
-        double derive(double value) 
+        public double derive(double value) 
         {
             return value > 0 ? 1.0d : 0.0d; // Derivative of ReLU
         }
@@ -108,13 +108,13 @@ public enum Activation
     STEP
     {
         @Override
-        double apply(double value) 
+        public double apply(double value) 
         {
             return value > 0 ? 1.0d : 0.0d; // Step function
         }
 
         @Override
-        double derive(double value) 
+        public double derive(double value) 
         {
             return 0; // Derivative of step function is always 0, making it unsuitable for gradient-based learning
         }
@@ -126,7 +126,7 @@ public enum Activation
      * @param value Input value to be transformed.
      * @return The activated output after applying the function.
      */
-    abstract double apply(double value);
+    public abstract double apply(double value);
 
     /**
      * Computes the derivative of the activation function.
@@ -134,5 +134,5 @@ public enum Activation
      * @param value Input value for derivative computation.
      * @return The derivative of the activation function with respect to the input.
      */
-    abstract double derive(double value);
+    public abstract double derive(double value);
 }
